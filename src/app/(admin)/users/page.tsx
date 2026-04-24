@@ -1,31 +1,36 @@
 "use client";
 
-import { useState, useEffect }   from "react";
-import { motion }                from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Trash2, AlertTriangle, Shield, User } from "lucide-react";
-import { Navbar }                from "@/components/layout/Navbar";
-import { ScrollReveal }          from "@/components/animations/ScrollReveal";
-import { SmoothScroll }          from "@/components/animations/SmoothScroll";
-import { useRequireAuth }        from "@/hooks/useAuth";
-import { getUsersAction, addStrikeAction, banUserAction, unbanUserAction } from "@/actions/admin.actions";
+import { Navbar } from "@/components/layout/Navbar";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { SmoothScroll } from "@/components/animations/SmoothScroll";
+import { useRequireAuth } from "@/hooks/useAuth";
+import {
+  getUsersAction,
+  addStrikeAction,
+  banUserAction,
+  unbanUserAction,
+} from "@/actions/admin.actions";
 import { showSuccess, showError } from "@/lib/error-handler";
 
 interface User {
-  id:           string;
-  name:         string;
-  email?:       string;
-  phone?:       string;
-  role:         string;
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  role: string;
   purchaseCount: number;
-  strikeCount:  number;
-  isBanned:     boolean;
+  strikeCount: number;
+  isBanned: boolean;
 }
 
 export default function AdminUsersPage() {
   const { user: adminUser, isLoading: authLoading } = useRequireAuth("admin");
-  const [users, setUsers]         = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
-  const [search, setSearch]       = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getUsersAction(1, search)
@@ -38,7 +43,11 @@ export default function AdminUsersPage() {
     try {
       await addStrikeAction(userId, "violation", "Admin strike");
       showSuccess("Strike added");
-      setUsers(users.map(u => u.id === userId ? { ...u, strikeCount: u.strikeCount + 1 } : u));
+      setUsers(
+        users.map((u) =>
+          u.id === userId ? { ...u, strikeCount: u.strikeCount + 1 } : u,
+        ),
+      );
     } catch (err) {
       showError(err);
     }
@@ -48,7 +57,9 @@ export default function AdminUsersPage() {
     try {
       await banUserAction(userId, "Admin decision");
       showSuccess("User banned");
-      setUsers(users.map(u => u.id === userId ? { ...u, isBanned: true } : u));
+      setUsers(
+        users.map((u) => (u.id === userId ? { ...u, isBanned: true } : u)),
+      );
     } catch (err) {
       showError(err);
     }
@@ -58,7 +69,9 @@ export default function AdminUsersPage() {
     try {
       await unbanUserAction(userId);
       showSuccess("User unbanned");
-      setUsers(users.map(u => u.id === userId ? { ...u, isBanned: false } : u));
+      setUsers(
+        users.map((u) => (u.id === userId ? { ...u, isBanned: false } : u)),
+      );
     } catch (err) {
       showError(err);
     }
@@ -77,11 +90,12 @@ export default function AdminUsersPage() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-20 pb-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
           {/* Header */}
           <ScrollReveal className="mt-8 mb-6">
             <h1 className="text-3xl font-bold">User Management</h1>
-            <p className="text-muted-foreground mt-1">Manage users, strikes, and bans</p>
+            <p className="text-muted-foreground mt-1">
+              Manage users, strikes, and bans
+            </p>
           </ScrollReveal>
 
           {/* Search */}
@@ -102,24 +116,42 @@ export default function AdminUsersPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 border-b border-border">
                     <tr>
-                      <th className="px-6 py-3 text-left font-semibold">User</th>
-                      <th className="px-6 py-3 text-left font-semibold">Role</th>
-                      <th className="px-6 py-3 text-left font-semibold">Purchases</th>
-                      <th className="px-6 py-3 text-left font-semibold">Strikes</th>
-                      <th className="px-6 py-3 text-left font-semibold">Status</th>
-                      <th className="px-6 py-3 text-left font-semibold">Actions</th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        User
+                      </th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        Role
+                      </th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        Purchases
+                      </th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        Strikes
+                      </th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left font-semibold">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {usersLoading ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                        <td
+                          colSpan={6}
+                          className="px-6 py-8 text-center text-muted-foreground"
+                        >
                           Loading users...
                         </td>
                       </tr>
                     ) : users.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                        <td
+                          colSpan={6}
+                          className="px-6 py-8 text-center text-muted-foreground"
+                        >
                           No users found
                         </td>
                       </tr>
@@ -134,15 +166,21 @@ export default function AdminUsersPage() {
                           <td className="px-6 py-3">
                             <div>
                               <p className="font-medium">{u.name}</p>
-                              <p className="text-xs text-muted-foreground">{u.email || u.phone}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {u.email || u.phone}
+                              </p>
                             </div>
                           </td>
                           <td className="px-6 py-3">
-                            <span className="text-xs capitalize px-2 py-1 rounded-full bg-muted">{u.role}</span>
+                            <span className="text-xs capitalize px-2 py-1 rounded-full bg-muted">
+                              {u.role}
+                            </span>
                           </td>
                           <td className="px-6 py-3">{u.purchaseCount}</td>
                           <td className="px-6 py-3">
-                            <span className={`font-semibold ${u.strikeCount > 0 ? "text-red-500" : "text-green-500"}`}>
+                            <span
+                              className={`font-semibold ${u.strikeCount > 0 ? "text-red-500" : "text-green-500"}`}
+                            >
                               {u.strikeCount}/3
                             </span>
                           </td>

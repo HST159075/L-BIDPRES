@@ -1,121 +1,212 @@
 "use client";
 
-import { useEffect, useState }  from "react";
-import { motion }               from "framer-motion";
-import { BarChart3, Users, TrendingUp, DollarSign, AlertCircle, CheckCircle } from "lucide-react";
-import { Navbar }               from "@/components/layout/Navbar";
-import { ScrollReveal }         from "@/components/animations/ScrollReveal";
-import { SmoothScroll }         from "@/components/animations/SmoothScroll";
-import { useRequireAuth }       from "@/hooks/useAuth";
-import { getAnalyticsAction }   from "@/actions/admin.actions";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Users,
+  TrendingUp,
+  DollarSign,
+  AlertCircle,
+  CheckCircle,
+  Gavel,
+  ArrowRight,
+} from "lucide-react";
+import { Navbar } from "@/components/layout/Navbar";
+import {
+  ScrollReveal,
+  StaggerChildren,
+  StaggerItem,
+} from "@/components/animations/ScrollReveal";
+import { SmoothScroll } from "@/components/animations/SmoothScroll";
+import { useRequireAuth } from "@/hooks/useAuth";
+import { getAnalyticsAction } from "@/actions/admin.actions";
+import { formatPriceEn } from "@/lib/utils";
+import { ROUTES } from "@/config/constants";
 
 interface Analytics {
-  totalUsers?:           number;
-  totalAuctions?:        number;
-  totalRevenue?:         number;
-  platformCommission?:   number;
-  activeAuctions?:       number;
-  pendingApplications?:  number;
-  totalStrikes?:         number;
-  bannedUsers?:          number;
+  totalUsers?: number;
+  totalAuctions?: number;
+  totalRevenue?: number;
+  platformCommission?: number;
+  activeAuctions?: number;
+  pendingApplications?: number;
+  totalStrikes?: number;
+  bannedUsers?: number;
 }
 
 export default function AdminDashboardPage() {
-  const { user, isLoading } = useRequireAuth("admin");
-  const [analytics, setAnalytics] = useState<Analytics | null>(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const { user, isLoading: authLoading } = useRequireAuth("admin");
+  const [analytics, setAnalytics] = useState<Analytics>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getAnalyticsAction()
-      .then((res) => setAnalytics(res.data as Analytics || {}))
-      .catch(() => setAnalytics({}))
-      .finally(() => setAnalyticsLoading(false));
+      .then((res) => setAnalytics((res.data as Analytics) || {}))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  if (isLoading) {
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-bid-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[var(--color-bid-500)] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   const stats = [
-    { label: "Total Users",         value: analytics?.totalUsers || 0,          icon: Users,        color: "text-blue-500" },
-    { label: "Live Auctions",       value: analytics?.activeAuctions || 0,      icon: TrendingUp,   color: "text-green-500" },
-    { label: "Platform Revenue",    value: `৳${(analytics?.platformCommission || 0).toLocaleString()}`, icon: DollarSign, color: "text-amber-500" },
-    { label: "Strikes Issued",      value: analytics?.totalStrikes || 0,        icon: AlertCircle,  color: "text-red-500" },
-    { label: "Pending Apps",        value: analytics?.pendingApplications || 0, icon: CheckCircle,  color: "text-purple-500" },
-    { label: "Banned Users",        value: analytics?.bannedUsers || 0,         icon: BarChart3,    color: "text-destructive" },
+    {
+      label: "Total Users",
+      value: analytics.totalUsers || 0,
+      icon: Users,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      label: "Live Auctions",
+      value: analytics.activeAuctions || 0,
+      icon: TrendingUp,
+      color: "text-green-500",
+      bg: "bg-green-500/10",
+    },
+    {
+      label: "Platform Revenue",
+      value: formatPriceEn(analytics.platformCommission || 0),
+      icon: DollarSign,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+    },
+    {
+      label: "Pending Apps",
+      value: analytics.pendingApplications || 0,
+      icon: CheckCircle,
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+    },
+    {
+      label: "Total Strikes",
+      value: analytics.totalStrikes || 0,
+      icon: AlertCircle,
+      color: "text-red-500",
+      bg: "bg-red-500/10",
+    },
+    {
+      label: "Banned Users",
+      value: analytics.bannedUsers || 0,
+      icon: Users,
+      color: "text-destructive",
+      bg: "bg-destructive/10",
+    },
+  ];
+
+  const quickActions = [
+    {
+      label: "Manage Users",
+      href: ROUTES.adminUsers,
+      icon: Users,
+      desc: "Strike, ban, or unban users",
+    },
+    {
+      label: "Review Applications",
+      href: ROUTES.adminApplications,
+      icon: CheckCircle,
+      desc: "Approve or reject seller applications",
+    },
+    {
+      label: "Browse Auctions",
+      href: ROUTES.auctions,
+      icon: Gavel,
+      desc: "View all live auctions",
+    },
   ];
 
   return (
     <SmoothScroll>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[var(--color-background)]">
         <Navbar />
-        <div className="pt-20 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Header */}
+        <div className="pt-20 pb-16 max-w-6xl mx-auto px-4 sm:px-6">
           <ScrollReveal className="mt-8 mb-10">
-            <div>
-              <p className="text-muted-foreground text-sm">Welcome back, admin</p>
-              <h1 className="text-3xl font-bold mt-1">{user?.name}</h1>
-              <p className="text-muted-foreground text-sm mt-2">Platform analytics and management</p>
-            </div>
+            <p className="text-[var(--color-muted-foreground)] text-sm">
+              Admin Panel
+            </p>
+            <h1 className="text-3xl font-bold mt-1">Platform Analytics</h1>
           </ScrollReveal>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-            {stats.map((stat, i) => (
-              <ScrollReveal key={stat.label} delay={i * 0.05}>
-                <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-muted ${stat.color}`}>
+          <StaggerChildren className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+            {stats.map((stat) => (
+              <StaggerItem key={stat.label}>
+                <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-5 space-y-3">
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}
+                  >
                     <stat.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                    <p className="text-2xl font-bold">
+                      {loading ? (
+                        <span className="animate-pulse bg-[var(--color-muted)] rounded w-12 h-6 inline-block" />
+                      ) : (
+                        stat.value
+                      )}
+                    </p>
+                    <p className="text-xs text-[var(--color-muted-foreground)]">
+                      {stat.label}
+                    </p>
                   </div>
                 </div>
-              </ScrollReveal>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerChildren>
 
           {/* Quick Actions */}
-          <ScrollReveal className="grid lg:grid-cols-2 gap-6">
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <h2 className="font-semibold text-lg mb-4">Quick Actions</h2>
-              <div className="space-y-2">
-                <a href="/admin/users" className="block p-3 bg-muted rounded-xl hover:bg-accent transition-colors text-sm font-medium">
-                  👥 Manage Users
-                </a>
-                <a href="/admin/applications" className="block p-3 bg-muted rounded-xl hover:bg-accent transition-colors text-sm font-medium">
-                  📋 Review Applications
-                </a>
-                <a href="/admin/users" className="block p-3 bg-muted rounded-xl hover:bg-accent transition-colors text-sm font-medium">
-                  ⚠️ Manage Strikes & Bans
-                </a>
-              </div>
-            </div>
-
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <h2 className="font-semibold text-lg mb-4">System Status</h2>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Database</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500 rounded-full" /> Connected</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Redis</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500 rounded-full" /> Connected</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Socket.io</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500 rounded-full" /> Active</span>
-                </div>
-              </div>
+          <ScrollReveal>
+            <h2 className="font-semibold text-lg mb-4">Quick Actions</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {quickActions.map((action) => (
+                <Link key={action.href} href={action.href}>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-5 hover:border-[var(--color-bid-500)]/40 transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-[var(--color-bid-500)]/10 flex items-center justify-center">
+                        <action.icon className="w-5 h-5 text-[var(--color-bid-500)]" />
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-[var(--color-muted-foreground)] group-hover:text-[var(--color-bid-500)] group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="font-semibold text-sm">{action.label}</p>
+                    <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
+                      {action.desc}
+                    </p>
+                  </motion.div>
+                </Link>
+              ))}
             </div>
           </ScrollReveal>
+
+          {/* Pending applications alert */}
+          {(analytics.pendingApplications || 0) > 0 && (
+            <ScrollReveal className="mt-6">
+              <div className="flex items-center justify-between p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-amber-500" />
+                  <p className="text-sm font-medium">
+                    {analytics.pendingApplications} seller application
+                    {(analytics.pendingApplications || 0) > 1 ? "s" : ""}{" "}
+                    waiting for review
+                  </p>
+                </div>
+                <Link
+                  href={ROUTES.adminApplications}
+                  className="px-3 py-1.5 text-xs bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                  Review Now
+                </Link>
+              </div>
+            </ScrollReveal>
+          )}
         </div>
       </div>
     </SmoothScroll>

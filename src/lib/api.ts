@@ -3,42 +3,58 @@ import { API_URL } from "@/config/constants";
 import toast from "react-hot-toast";
 
 const api: AxiosInstance = axios.create({
-  baseURL:         API_URL,
-  timeout:         30000,
+  baseURL: API_URL,
+  timeout: 30000,
   withCredentials: true,
-  headers:         { "Content-Type": "application/json" },
+  headers: { "Content-Type": "application/json" },
 });
 
-// ── Token storage (fallback for when cookie doesn't work) ─────
-let _token: string | null = null;
+const TOKEN_KEY = "bid_auth_token";
 
-export function setAuthToken(token: string | null) {
-  _token = token;
-  if (token) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    if (typeof window !== "undefined") sessionStorage.setItem("auth_token", token);
-  } else {
-    delete api.defaults.headers.common["Authorization"];
-    if (typeof window !== "undefined") sessionStorage.removeItem("auth_token");
+// ── Token helpers ─────────────────────────────────────────────
+function getStorage(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage;
+  } catch {
+    return null;
   }
 }
 
-export function loadStoredToken() {
-  if (typeof window === "undefined") return;
-  const stored = sessionStorage.getItem("auth_token");
-  if (stored) setAuthToken(stored);
+export function setAuthToken(token: string | null) {
+  const storage = getStorage();
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    storage?.setItem(TOKEN_KEY, token);
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+    storage?.removeItem(TOKEN_KEY);
+  }
+}
+
+export function loadStoredToken(): string | null {
+  const storage = getStorage();
+  const token = storage?.getItem(TOKEN_KEY) || null;
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  }
+  return token;
+}
+
+export function getStoredToken(): string | null {
+  return getStorage()?.getItem(TOKEN_KEY) || null;
 }
 
 // ── Request interceptor ───────────────────────────────────────
 api.interceptors.request.use(
   (config) => {
-    const stored = typeof window !== "undefined" ? sessionStorage.getItem("auth_token") : null;
-    if (stored && !config.headers["Authorization"]) {
-      config.headers["Authorization"] = `Bearer ${stored}`;
+    const token = getStoredToken();
+    if (token && !config.headers["Authorization"]) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // ── Response interceptor ──────────────────────────────────────
@@ -46,11 +62,14 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError<{ message: string }>) => {
     const message = error.response?.data?.message || "Something went wrong";
-    const status  = error.response?.status;
+    const status = error.response?.status;
 
     if (status === 401) {
       setAuthToken(null);
-      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+      if (
+        typeof window !== "undefined" &&
+        !window.location.pathname.includes("/login")
+      ) {
         window.location.href = "/login";
       }
     } else if (status === 403) {
@@ -62,7 +81,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject({ message, status });
-  }
+  },
 );
 
 export default api;
@@ -71,6 +90,6 @@ export const extractData = <T>(response: AxiosResponse): T =>
   response.data.data as T;
 
 export const extractPaginated = <T>(response: AxiosResponse) => ({
-  data:       response.data.data as T[],
+  data: response.data.data as T[],
   pagination: response.data.pagination,
 });
