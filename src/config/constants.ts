@@ -43,7 +43,7 @@ export const ROUTES = {
   sellerApply: "/sapply",
   adminDashboard: "/dashboard",
   adminUsers: "/users",
-  adminApplications: "/admin/applications",
+  adminApplications: "/applications",
   paymentSuccess: "/payment/success",
   paymentFailed: "/payment/failed",
 } as const;
