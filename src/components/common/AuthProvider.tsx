@@ -3,39 +3,51 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { authService } from "@/services/auth.service";
-import { loadStoredToken } from "@/lib/api";
+
+const TOKEN_KEY = "bid_auth_token";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isInitialized, setUser, setLoading, setInitialized } = useAuthStore();
 
   useEffect(() => {
     if (isInitialized) return;
-
-    // Load token first before any API call
-    const token = loadStoredToken();
-
     setLoading(true);
-
+    // Read token directly from localStorage
+    let token: string | null = null;
+    try {
+      token = localStorage.getItem(TOKEN_KEY);
+    } catch {
+      token = null;
+    }
     if (!token) {
-      // No token — skip getMe call
       setUser(null);
       setLoading(false);
       setInitialized(true);
       return;
     }
 
-    authService
-      .getMe()
-      .then((user) => setUser(user))
-      .catch(() => {
-        setUser(null);
-        // Clear invalid token
-        import("@/lib/api").then((m) => m.setAuthToken(null));
-      })
-      .finally(() => {
-        setLoading(false);
-        setInitialized(true);
-      });
+    // Set token in axios headers before getMe call
+    import("@/lib/api").then(({ default: api }) => {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      authService
+        .getMe()
+        .then((user) => {
+          setUser(user);
+        })
+        .catch(() => {
+          // Token invalid — clear it
+          setUser(null);
+          try {
+            localStorage.removeItem(TOKEN_KEY);
+          } catch {}
+          delete api.defaults.headers.common["Authorization"];
+        })
+        .finally(() => {
+          setLoading(false);
+          setInitialized(true);
+        });
+    });
   }, [isInitialized, setUser, setLoading, setInitialized]);
 
   return <>{children}</>;

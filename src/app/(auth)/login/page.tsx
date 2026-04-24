@@ -23,7 +23,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useAuthStore();
+  const { setUser, setInitialized } = useAuthStore();
   const [showPass, setShowPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [needsOTP, setNeedsOTP] = useState(false);
@@ -34,18 +34,44 @@ export default function LoginPage() {
 
   const form = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
+  const doLogin = async (identifier: string, password: string) => {
+    // Step 1: Login
+    const res = await authService.login({ identifier, password });
+    const data = (
+      res.data as { data?: { token?: string; id?: string; role?: string } }
+    ).data;
+    const token = data?.token;
+
+    if (!token) throw new Error("No token received from server");
+
+    // Step 2: Save token FIRST
+    setAuthToken(token);
+
+    // Step 3: Small delay to ensure token is saved
+    await new Promise((r) => setTimeout(r, 100));
+
+    // Step 4: Get user info
+    const user = await authService.getMe();
+    setUser(user);
+    setInitialized(true);
+
+    return user;
+  };
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
-      // Login — backend returns token in response body
-      const res = await authService.login(data);
-      const token = (res.data as { data?: { token?: string } }).data?.token;
-      if (token) setAuthToken(token);
+      const user = await doLogin(data.identifier, data.password);
+      showSuccess(`Welcome back, ${user.name}!`);
 
-      const user = await authService.getMe();
-      setUser(user);
-      showSuccess("Welcome back!");
-      router.push(ROUTES.buyerDashboard);
+      // Redirect based on role
+      if (user.role === "admin") {
+        router.push(ROUTES.adminDashboard);
+      } else if (user.role === "seller") {
+        router.push(ROUTES.sellerDashboard);
+      } else {
+        router.push(ROUTES.buyerDashboard);
+      }
     } catch (err: unknown) {
       const e = err as { status?: number };
       if (e?.status === 403) {
@@ -60,7 +86,7 @@ export default function LoginPage() {
           } as Parameters<typeof authService.sendOTP>[0]);
           showSuccess(`OTP sent to ${data.identifier}`);
         } catch {
-          showSuccess("Please check your email/phone for the OTP.");
+          showSuccess("Please check your email/phone for OTP.");
         }
       } else {
         showError(err);
@@ -79,15 +105,19 @@ export default function LoginPage() {
         code: otp,
         type: otpType,
       } as Parameters<typeof authService.verifyOTP>[0]);
-      // After verify, try login again
-      const loginRes = await authService.login(form.getValues());
-      const token = (loginRes.data as { data?: { token?: string } }).data
-        ?.token;
-      if (token) setAuthToken(token);
-      const user = await authService.getMe();
-      setUser(user);
-      showSuccess("Verified! Welcome.");
-      router.push(ROUTES.buyerDashboard);
+
+      // After OTP verify, login again to get token
+      const values = form.getValues();
+      const user = await doLogin(values.identifier, values.password);
+      showSuccess(`Verified! Welcome, ${user.name}!`);
+
+      if (user.role === "admin") {
+        router.push(ROUTES.adminDashboard);
+      } else if (user.role === "seller") {
+        router.push(ROUTES.sellerDashboard);
+      } else {
+        router.push(ROUTES.buyerDashboard);
+      }
     } catch (err) {
       showError(err);
     } finally {
@@ -170,7 +200,7 @@ export default function LoginPage() {
                   onClick={() => setNeedsOTP(false)}
                   className="text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
                 >
-                  Back to login
+                  Back
                 </button>
                 <button
                   onClick={handleResendOTP}

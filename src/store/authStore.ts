@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import type { User } from "@/types";
 
 interface AuthState {
@@ -12,24 +11,16 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isLoading: false,
-      isInitialized: false,
-      setUser: (user) => set({ user }),
-      setLoading: (isLoading) => set({ isLoading }),
-      setInitialized: (isInitialized) => set({ isInitialized }),
-      logout: () => set({ user: null }),
-    }),
-    {
-      name: "auth-store",
-      storage: createJSONStorage(() => sessionStorage),
-      partialize: (state) => ({ user: state.user }),
-    },
-  ),
-);
+// Simple store without persistence — AuthProvider handles loading from localStorage
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  isLoading: true, // Start as loading until AuthProvider initializes
+  isInitialized: false,
+  setUser: (user) => set({ user }),
+  setLoading: (isLoading) => set({ isLoading }),
+  setInitialized: (isInitialized) => set({ isInitialized }),
+  logout: () => set({ user: null, isInitialized: false }),
+}));
 
 // Selectors
 export const selectUser = (s: AuthState) => s.user;
