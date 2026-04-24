@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import { API_URL } from "@/config/constants";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -20,17 +21,20 @@ function getStorage(): Storage | null {
     return null;
   }
 }
-
 export function setAuthToken(token: string | null) {
   const storage = getStorage();
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     storage?.setItem(TOKEN_KEY, token);
+    // Middleware-er jonno cookie-te save korun (7 days expiry)
+    Cookies.set("session", token, { expires: 7, path: '/' }); 
   } else {
     delete api.defaults.headers.common["Authorization"];
     storage?.removeItem(TOKEN_KEY);
+    Cookies.remove("session");
   }
 }
+
 
 export function loadStoredToken(): string | null {
   const storage = getStorage();
@@ -84,7 +88,7 @@ api.interceptors.response.use(
   },
 );
 
-export default api;
+
 
 export const extractData = <T>(response: AxiosResponse): T =>
   response.data.data as T;
@@ -93,3 +97,9 @@ export const extractPaginated = <T>(response: AxiosResponse) => ({
   data: response.data.data as T[],
   pagination: response.data.pagination,
 });
+
+if (typeof window !== "undefined") {
+  loadStoredToken();
+}
+
+export default api;
