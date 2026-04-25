@@ -44,7 +44,7 @@ export async function getUsersAction(page = 1, search?: string) {
     page: String(page), 
     ...(search ? { search } : {}) 
   });
-  return adminFetch(`/admin/users?${params}`); // API path admin prefix thaka bhalo
+  return adminFetch(`/users?${params}`); // API path admin prefix thaka bhalo
 }
 
 export async function getPendingApplicationsAction(page = 1) {
@@ -55,8 +55,8 @@ export async function approveApplicationAction(id: string) {
   const result = await adminFetch(`/admin/applications/${id}/approve`, { method: "PUT" });
   if (!result.error) {
     // Apnar structure onujayi application page revalidate hobe
-    revalidatePath("/admin/applications");
-    revalidatePath("/admin/dashboard"); // Analytics update korar jonno
+    revalidatePath("/applications");
+    revalidatePath("/dashboard"); // Analytics update korar jonno
   }
   return result;
 }
@@ -67,19 +67,19 @@ export async function rejectApplicationAction(id: string, reason: string) {
     body: JSON.stringify({ reason }),
   });
   if (!result.error) {
-    revalidatePath("/admin/applications");
+    revalidatePath("/applications");
   }
   return result;
 }
 
 export async function addStrikeAction(userId: string, reason: string, description?: string) {
-  const result = await adminFetch(`/admin/users/${userId}/strike`, {
+  const result = await adminFetch(`/users/${userId}/strike`, {
     method: "PUT",
     body: JSON.stringify({ reason, description }),
   });
   if (!result.error) {
-    revalidatePath("/admin/users");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/users");
+    revalidatePath("/dashboard");
   }
   return result;
 }
@@ -90,16 +90,16 @@ export async function banUserAction(userId: string, reason: string) {
     body: JSON.stringify({ reason }),
   });
   if (!result.error) {
-    revalidatePath("/admin/users");
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/users");
+    revalidatePath("/dashboard");
   }
   return result;
 }
 
 export async function unbanUserAction(userId: string) {
-  const result = await adminFetch(`/admin/users/${userId}/unban`, { method: "PUT" });
+  const result = await adminFetch(`/users/${userId}/unban`, { method: "PUT" });
   if (!result.error) {
-    revalidatePath("/admin/users");
+    revalidatePath("/users");
   }
   return result;
 }

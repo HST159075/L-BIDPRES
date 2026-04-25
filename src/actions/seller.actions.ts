@@ -58,8 +58,8 @@ export async function createListingAction(data: Record<string, unknown>) {
   if (!result.error) {
     // Apnar image-e dekhlam folder-er nam 'slistings' ebong 'sdashboard'
     // Tai ei path gulo revalidate korle data sothik bhabe update hobe
-    revalidatePath("/seller/slistings");
-    revalidatePath("/seller/sdashboard");
+    revalidatePath("/slistings");
+    revalidatePath("/sdashboard");
   }
   return result;
 }
@@ -69,15 +69,15 @@ export async function updateListingAction(id: string, data: Record<string, unkno
     method: "PUT",
     body: JSON.stringify(data),
   });
-  if (!result.error) revalidatePath("/seller/slistings");
+  if (!result.error) revalidatePath("/slistings");
   return result;
 }
 
 export async function deleteListingAction(id: string) {
   const result = await authedFetch(`/listings/${id}`, { method: "DELETE" });
   if (!result.error) {
-    revalidatePath("/seller/slistings");
-    revalidatePath("/seller/sdashboard");
+    revalidatePath("/slistings");
+    revalidatePath("/sdashboard");
   }
   return result;
 }
