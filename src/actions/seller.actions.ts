@@ -8,7 +8,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 async function authedFetch(path: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
   
-  // 'session' cookie priority ditte hobe, tarpor better-auth check hobe
+  // Apnar manual login 'session' cookie-ke priority deya hoyeche
   const sessionToken = 
     cookieStore.get("session")?.value || 
     cookieStore.get("better-auth.session_token")?.value ||
@@ -18,17 +18,17 @@ async function authedFetch(path: string, options: RequestInit = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      // Backend standard JWT ba Manual Session Token expect korle Authorization header best
+      // Backend JWT expect korle Authorization header-e Bearer token thaka dorkar
       ...(sessionToken ? { "Authorization": `Bearer ${sessionToken}` } : {}),
       ...options.headers,
     },
     cache: "no-store",
   });
 
-  // Response JSON parse korar somoy error handling (safety-r jonno)
+  // Safe JSON parsing jate error na hoy
   const json = await res.json().catch(() => ({}));
   
-  if (!res.ok) return { error: json.message || "Failed" };
+  if (!res.ok) return { error: json.message || "Request failed" };
   return { data: json.data };
 }
 
@@ -40,7 +40,7 @@ export async function applyForSellerAction(data: {
     method: "POST",
     body: JSON.stringify(data),
   });
-  // Folder structure onujayi 'sapply' path revalidate kora holo
+  // Folder structure-e folder-er nam 'sapply' tai path thik kora holo
   if (!result.error) revalidatePath("/seller/sapply");
   return result;
 }
@@ -56,7 +56,8 @@ export async function createListingAction(data: Record<string, unknown>) {
   });
   
   if (!result.error) {
-    // Dashboard analytics ebong Listing list duto-i update hobe
+    // Apnar image-e dekhlam folder-er nam 'slistings' ebong 'sdashboard'
+    // Tai ei path gulo revalidate korle data sothik bhabe update hobe
     revalidatePath("/seller/slistings");
     revalidatePath("/seller/sdashboard");
   }
@@ -82,5 +83,6 @@ export async function deleteListingAction(id: string) {
 }
 
 export async function getMyListingsAction(page = 1, limit = 20) {
+  // Backend standard query parameter
   return authedFetch(`/listings/seller/mine?page=${page}&limit=${limit}`);
 }

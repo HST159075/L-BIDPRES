@@ -1,3 +1,5 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_ROUTES = ["/", "/auctions", "/login", "/register", "/payment"];
@@ -6,38 +8,56 @@ const AUTH_ROUTES = ["/login", "/register"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. All possible session cookies check korchi
+  // ১. সেশন কুকি চেক (ম্যানুয়াল এবং Better-Auth উভয়ই)
   const sessionCookie =
-    request.cookies.get("session") ||
-    request.cookies.get("better-auth.session_token") ||
-    request.cookies.get("__Secure-better-auth.session_token");
+    request.cookies.get("session")?.value ||
+    request.cookies.get("better-auth.session_token")?.value ||
+    request.cookies.get("__Secure-better-auth.session_token")?.value;
 
-  const isLoggedIn = !!sessionCookie?.value;
+  const isLoggedIn = !!sessionCookie;
 
-  // 2. User logged in thakle login/register page-e dhukte dibo na
+  // ২. লগইন থাকলে লগইন/রেজিস্টার পেজে যেতে বাধা দেয়া
   if (isLoggedIn && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    // Apnar project-e dashboard-er exact path (e.g., /dashboard, /seller/dashboard etc) check korun
-    // Default-e /dashboard-e pathiye dichchi
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 3. Public route check
+  // ৩. রুট টাইপ ডিটেকশন
   const isPublic = PUBLIC_ROUTES.some(
     (r) => pathname === r || pathname.startsWith(r + "/"),
   );
+  
+  // অ্যাডমিন এবং সেলার রুট চেক
+  const isAdminRoute = pathname.startsWith("/admin");
+  const isSellerRoute = pathname.startsWith("/seller");
 
-  // 4. Protected route-e jete chaile kintu login na thakle redirect
+  // ৪. প্রোটেকশন লজিক
   if (!isPublic && !isLoggedIn) {
     const url = new URL("/login", request.url);
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
   }
 
+  // ৫. রোল-বেসড অ্যাক্সেস কন্ট্রোল (Security Layer)
+  // নোট: টোকেন ডিকোড করা ছাড়া মিডলওয়্যারে রোল চেক করা কঠিন, 
+  // তবে কুকিতে 'user-role' সেভ থাকলে নিচের লজিক কাজ করবে।
+  const userRole = request.cookies.get("user-role")?.value; // আপনার লগইন অ্যাকশনে এটি সেট করতে হবে
+
+  if (isAdminRoute && userRole !== "admin") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (isSellerRoute && userRole !== "seller" && userRole !== "admin") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   const response = NextResponse.next();
 
-  // 5. Locale set kora (Internationalization)
+  // ৬. লোকাল সেটআপ (i18n)
   if (!request.cookies.get("locale")) {
-    response.cookies.set("locale", "en", { maxAge: 365 * 24 * 60 * 60 });
+    response.cookies.set("locale", "en", { 
+      maxAge: 365 * 24 * 60 * 60,
+      path: "/",
+    });
   }
 
   return response;
@@ -45,7 +65,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Static assets ebong API chara sob kichu match korbe
+    // API, Static assets, এবং images বাদ দিয়ে সব রুট
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

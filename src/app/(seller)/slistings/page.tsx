@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react"; // useMemo যোগ করা হয়েছে
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Edit2, Trash2, Plus, Search } from "lucide-react";
@@ -33,8 +33,7 @@ export default function SellerListingsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // ✅ Derived State: filtering logic সরাসরি এখানে থাকবে
-  // listings বা search পরিবর্তন হলে এটি অটোমেটিক আপডেট হবে
+  // ✅ Derived State: Filtered listings based on search
   const filteredListings = useMemo(() => {
     return listings.filter((l) =>
       l.title.toLowerCase().includes(search.toLowerCase()),
@@ -44,8 +43,9 @@ export default function SellerListingsPage() {
   useEffect(() => {
     getMyListingsAction(1, 50)
       .then((res) => {
-        const data = (res.data as { data: Listing[] }).data || [];
-        setListings(data);
+        // API response থেকে data extract করার সময় safety check
+        const rawData = res.data?.data || res.data || [];
+        setListings(Array.isArray(rawData) ? rawData : []);
       })
       .catch(() => setListings([]))
       .finally(() => setLoading(false));
@@ -55,11 +55,11 @@ export default function SellerListingsPage() {
     if (!deleteId) return;
     setDeleting(true);
     try {
-      await deleteListingAction(deleteId);
+      const result = await deleteListingAction(deleteId);
+      if (result?.error) throw new Error(result.error);
+      
       showSuccess("Listing deleted");
-      // ✅ শুধু listings আপডেট করলেই filteredListings অটো আপডেট হয়ে যাবে
-      const updated = listings.filter((l) => l.id !== deleteId);
-      setListings(updated);
+      setListings((prev) => prev.filter((l) => l.id !== deleteId));
     } catch (err) {
       showError(err);
     } finally {
@@ -83,7 +83,7 @@ export default function SellerListingsPage() {
         <div className="pt-20 pb-16 max-w-4xl mx-auto px-4 sm:px-6">
           <ScrollReveal className="mt-8 mb-6 flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold">My Listings</h1>
+              <h1 className="text-3xl font-bold text-[var(--color-foreground)]">My Listings</h1>
               <p className="text-[var(--color-muted-foreground)] mt-1">
                 {listings.length} total listings
               </p>
@@ -96,7 +96,7 @@ export default function SellerListingsPage() {
             </Link>
           </ScrollReveal>
 
-          {/* Search */}
+          {/* Search Box */}
           <ScrollReveal className="mb-5">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)]" />
@@ -105,101 +105,99 @@ export default function SellerListingsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search listings..."
-                className="w-full pl-10 pr-4 py-3 bg-[var(--color-muted)] border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-bid-500)]"
+                className="w-full pl-10 pr-4 py-3 bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-bid-500)] text-[var(--color-foreground)]"
               />
             </div>
           </ScrollReveal>
 
-          {/* List */}
+          {/* Listings List */}
           <ScrollReveal>
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="h-20 bg-[var(--color-muted)] rounded-2xl animate-pulse"
+                    className="h-24 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl animate-pulse"
                   />
                 ))}
               </div>
-            ) : filteredListings.length === 0 ? ( // ✅ filtered এর বদলে filteredListings
+            ) : filteredListings.length === 0 ? (
               <div className="text-center py-16 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl">
                 <p className="font-medium text-[var(--color-muted-foreground)]">
-                  {search ? "No listings found" : "No listings yet"}
+                  {search ? "No listings found matching your search" : "No listings yet"}
                 </p>
                 {!search && (
                   <Link
                     href={ROUTES.sellerNewListing}
                     className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-[var(--color-bid-500)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--color-bid-600)] transition-colors"
                   >
-                    <Plus className="w-4 h-4" /> Create Listing
+                    <Plus className="w-4 h-4" /> Create First Listing
                   </Link>
                 )}
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredListings.map(
-                  (
-                    listing,
-                    i, // ✅ filtered এর বদলে filteredListings
-                  ) => (
-                    <motion.div
-                      key={listing.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className="flex items-center gap-4 p-4 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl hover:border-[var(--color-bid-500)]/30 transition-colors"
-                    >
-                      {listing.photos?.[0] && (
-                        <img
-                          src={listing.photos[0]}
-                          alt={listing.title}
-                          className="w-14 h-14 rounded-xl object-cover shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate">
-                          {listing.title}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                              listing.auction?.status === "live"
-                                ? "bg-green-500/10 text-green-600"
-                                : listing.auction?.status === "scheduled"
-                                  ? "bg-blue-500/10 text-blue-600"
-                                  : listing.status === "active"
-                                    ? "bg-amber-500/10 text-amber-600"
-                                    : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
-                            }`}
-                          >
-                            {listing.auction?.status || listing.status}
+                {filteredListings.map((listing, i) => (
+                  <motion.div
+                    key={listing.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    className="flex items-center gap-4 p-4 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl hover:border-[var(--color-bid-500)]/30 transition-shadow hover:shadow-sm"
+                  >
+                    {listing.photos?.[0] ? (
+                      <img
+                        src={listing.photos[0]}
+                        alt={listing.title}
+                        className="w-16 h-16 rounded-xl object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl bg-[var(--color-muted)] flex items-center justify-center shrink-0">
+                         <Search className="w-6 h-6 text-[var(--color-muted-foreground)] opacity-20" />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-[var(--color-foreground)] truncate">
+                        {listing.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span
+                          className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md font-bold ${
+                            listing.auction?.status === "live"
+                              ? "bg-green-500/10 text-green-500"
+                              : listing.auction?.status === "scheduled"
+                                ? "bg-blue-500/10 text-blue-500"
+                                : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
+                          }`}
+                        >
+                          {listing.auction?.status || listing.status}
+                        </span>
+                        {listing.auction?.currentPrice && (
+                          <span className="text-xs font-medium text-[var(--color-foreground)]">
+                            {formatPriceEn(Number(listing.auction.currentPrice))}
                           </span>
-                          {listing.auction?.currentPrice && (
-                            <span className="text-xs text-[var(--color-muted-foreground)]">
-                              {formatPriceEn(
-                                Number(listing.auction.currentPrice),
-                              )}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Link
-                          href={`/seller/listings/${listing.id}/edit`}
-                          className="p-2 rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-accent)] transition-colors"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Link>
-                        <button
-                          onClick={() => setDeleteId(listing.id)}
-                          className="p-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ),
-                )}
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* ✅ Path fixed to match your structure: slistings/[id]/edit */}
+                      <Link
+                        href={`/seller/slistings/${listing.id}/edit`}
+                        className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => setDeleteId(listing.id)}
+                        className="p-2 rounded-lg border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             )}
           </ScrollReveal>
@@ -209,9 +207,9 @@ export default function SellerListingsPage() {
       <ConfirmDialog
         open={!!deleteId}
         title="Delete Listing"
-        description="Are you sure you want to delete this listing? This cannot be undone."
+        description="This action will permanently remove this item from the auction platform."
         variant="danger"
-        confirmText="Delete"
+        confirmText="Confirm Delete"
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
         isLoading={deleting}
