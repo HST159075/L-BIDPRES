@@ -217,7 +217,7 @@ export default function SellerDashboardPage() {
 
                       {/* ✅ Path Fixed: slistings/[id]/edit */}
                       <Link
-                        href={`/seller/slistings/${listing.id}/edit`}
+                        href={`/slistings/${listing.id}/edit`}
                         className="shrink-0 px-4 py-2 text-xs font-bold border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-foreground)] hover:text-[var(--color-background)] transition-all"
                       >
                         Edit

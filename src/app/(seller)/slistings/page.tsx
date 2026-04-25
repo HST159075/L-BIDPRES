@@ -184,7 +184,7 @@ export default function SellerListingsPage() {
                     <div className="flex items-center gap-2 shrink-0">
                       {/* ✅ Path fixed to match your structure: slistings/[id]/edit */}
                       <Link
-                        href={`/seller/slistings/${listing.id}/edit`}
+                        href={`/slistings/${listing.id}/edit`}
                         className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />

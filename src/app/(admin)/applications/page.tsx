@@ -1,31 +1,35 @@
 "use client";
 
-import { useState, useEffect }    from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image                       from "next/image";
-import { CheckCircle, XCircle }    from "lucide-react";
-import { Navbar }                  from "@/components/layout/Navbar";
-import { ScrollReveal }            from "@/components/animations/ScrollReveal";
-import { SmoothScroll }            from "@/components/animations/SmoothScroll";
-import { useRequireAuth }          from "@/hooks/useAuth";
-import { getPendingApplicationsAction, approveApplicationAction, rejectApplicationAction } from "@/actions/admin.actions";
-import { showSuccess, showError }  from "@/lib/error-handler";
+import Image from "next/image";
+import { CheckCircle, XCircle } from "lucide-react";
+import { Navbar } from "@/components/layout/Navbar";
+import { ScrollReveal } from "@/components/animations/ScrollReveal";
+import { SmoothScroll } from "@/components/animations/SmoothScroll";
+import { useRequireAuth } from "@/hooks/useAuth";
+import {
+  getPendingApplicationsAction,
+  approveApplicationAction,
+  rejectApplicationAction,
+} from "@/actions/admin.actions";
+import { showSuccess, showError } from "@/lib/error-handler";
 
 interface SellerApp {
-  id:              string;
-  userId:          string;
-  status:          string;
-  idCardUrl:       string;
+  id: string;
+  userId: string;
+  status: string;
+  idCardUrl: string;
   profilePhotoUrl: string;
   user?: { name: string; email: string };
-  createdAt:       string;
+  createdAt: string;
 }
 
 export default function AdminApplicationsPage() {
   const { user: adminUser, isLoading: authLoading } = useRequireAuth("admin");
-  const [apps, setApps]           = useState<SellerApp[]>([]);
+  const [apps, setApps] = useState<SellerApp[]>([]);
   const [appsLoading, setAppsLoading] = useState(true);
-  const [selectedId, setSelectedId]   = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     getPendingApplicationsAction(1)
@@ -38,7 +42,7 @@ export default function AdminApplicationsPage() {
     try {
       await approveApplicationAction(id);
       showSuccess("Application approved!");
-      setApps(apps.filter(a => a.id !== id));
+      setApps(apps.filter((a) => a.id !== id));
       setSelectedId(null);
     } catch (err) {
       showError(err);
@@ -51,7 +55,7 @@ export default function AdminApplicationsPage() {
     try {
       await rejectApplicationAction(id, reason);
       showSuccess("Application rejected!");
-      setApps(apps.filter(a => a.id !== id));
+      setApps(apps.filter((a) => a.id !== id));
       setSelectedId(null);
     } catch (err) {
       showError(err);
@@ -66,27 +70,32 @@ export default function AdminApplicationsPage() {
     );
   }
 
-  const selected = apps.find(a => a.id === selectedId);
+  const selected = apps.find((a) => a.id === selectedId);
 
   return (
     <SmoothScroll>
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-20 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
           {/* Header */}
           <ScrollReveal className="mt-8 mb-6">
             <h1 className="text-3xl font-bold">Seller Applications</h1>
-            <p className="text-muted-foreground mt-1">Review pending seller applications</p>
+            <p className="text-muted-foreground mt-1">
+              Review pending seller applications
+            </p>
           </ScrollReveal>
 
           <div className="grid lg:grid-cols-[400px_1fr] gap-6">
-
             {/* List */}
-            <ScrollReveal direction="left" className="lg:sticky lg:top-24 lg:h-fit">
+            <ScrollReveal
+              direction="left"
+              className="lg:sticky lg:top-24 lg:h-fit"
+            >
               <div className="bg-card border border-border rounded-2xl overflow-hidden">
                 {appsLoading ? (
-                  <div className="p-6 text-center text-muted-foreground">Loading...</div>
+                  <div className="p-6 text-center text-muted-foreground">
+                    Loading...
+                  </div>
                 ) : apps.length === 0 ? (
                   <div className="p-6 text-center text-muted-foreground">
                     No pending applications
@@ -103,8 +112,12 @@ export default function AdminApplicationsPage() {
                             : "hover:bg-muted/50"
                         }`}
                       >
-                        <p className="font-semibold text-sm">{app.user?.name || "Unknown"}</p>
-                        <p className="text-xs text-muted-foreground">{app.user?.email}</p>
+                        <p className="font-semibold text-sm">
+                          {app.user?.name || "Unknown"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {app.user?.email}
+                        </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           Applied {new Date(app.createdAt).toLocaleDateString()}
                         </p>
@@ -127,13 +140,19 @@ export default function AdminApplicationsPage() {
                     className="bg-card border border-border rounded-2xl p-6 space-y-6"
                   >
                     <div>
-                      <h2 className="text-xl font-bold">{selected.user?.name}</h2>
-                      <p className="text-sm text-muted-foreground">{selected.user?.email}</p>
+                      <h2 className="text-xl font-bold">
+                        {selected.user?.name}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {selected.user?.email}
+                      </p>
                     </div>
 
                     {/* ID Card */}
                     <div>
-                      <p className="text-sm font-semibold mb-3">ID Card / Passport</p>
+                      <p className="text-sm font-semibold mb-3">
+                        ID Card / Passport
+                      </p>
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
                         <Image
                           src={selected.idCardUrl}
@@ -147,7 +166,9 @@ export default function AdminApplicationsPage() {
 
                     {/* Profile Photo */}
                     <div>
-                      <p className="text-sm font-semibold mb-3">Profile Photo</p>
+                      <p className="text-sm font-semibold mb-3">
+                        Profile Photo
+                      </p>
                       <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-muted mx-auto">
                         <Image
                           src={selected.profilePhotoUrl}
