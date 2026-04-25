@@ -39,7 +39,7 @@ export default function SellerDashboardPage() {
   useEffect(() => {
     getMyListingsAction(1, 50)
       .then((res) => {
-        // API response থেকে সঠিকভাবে array extract করা
+     
         const rawData = res.data?.data || res.data || [];
         setListings(Array.isArray(rawData) ? rawData : []);
       })
@@ -55,12 +55,12 @@ export default function SellerDashboardPage() {
     );
   }
 
-  // Stats Calculation
+
   const activeCount = listings.filter((l) => l.auction?.status === "live").length;
   const totalCount = listings.length;
   const endedCount = listings.filter((l) => l.auction?.status === "ended").length;
   
-  // ক্যালকুলেটেড রেভিনিউ (যদি ইনভয়েস বা সোল্ড ডেটা থাকে, নাহলে ডিফল্ট ০)
+  
   const totalRevenue = 0; 
 
   const stats = [

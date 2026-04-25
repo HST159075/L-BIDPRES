@@ -43,7 +43,7 @@ export default function SellerListingsPage() {
   useEffect(() => {
     getMyListingsAction(1, 50)
       .then((res) => {
-        // API response থেকে data extract করার সময় safety check
+       
         const rawData = res.data?.data || res.data || [];
         setListings(Array.isArray(rawData) ? rawData : []);
       })
