@@ -35,16 +35,31 @@ export default function SellerDashboardPage() {
   const { user, isLoading: authLoading } = useRequireAuth("seller");
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    getMyListingsAction(1, 50)
-      .then((res) => {
-     
+    const fetchListings = async () => {
+      setLoading(true);
+      try {
+        const res = await getMyListingsAction(1, 50);
         const rawData = res.data?.data || res.data || [];
         setListings(Array.isArray(rawData) ? rawData : []);
-      })
-      .catch(() => setListings([]))
-      .finally(() => setLoading(false));
+      } catch {
+        setListings([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [refreshKey]);
+
+  // Auto-refresh every 5 seconds to show new listings
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   if (authLoading) {

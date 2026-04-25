@@ -32,6 +32,7 @@ export default function SellerListingsPage() {
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // ✅ Derived State: Filtered listings based on search
   const filteredListings = useMemo(() => {
@@ -41,13 +42,28 @@ export default function SellerListingsPage() {
   }, [listings, search]);
 
   useEffect(() => {
-    getMyListingsAction(1, 50)
-      .then((res) => {
-        // res এখন extractPaginated থেকে আসা অবজেক্ট { data: [], total: ... }
+    const fetchListings = async () => {
+      setLoading(true);
+      try {
+        const res = await getMyListingsAction(1, 50);
         const dataArray = res.data?.data || res.data || [];
         setListings(Array.isArray(dataArray) ? dataArray : []);
-      })
-      .finally(() => setLoading(false));
+      } catch {
+        setListings([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [refreshKey]);
+
+  // Auto-refresh every 3 seconds to show newly created listings
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleDelete = async (): Promise<void> => {
