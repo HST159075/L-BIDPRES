@@ -93,10 +93,15 @@ api.interceptors.response.use(
 export const extractData = <T>(response: AxiosResponse): T =>
   response.data.data as T;
 
-export const extractPaginated = <T>(response: AxiosResponse) => ({
-  data: response.data.data as T[],
-  pagination: response.data.pagination,
-});
+export const extractPaginated = <T>(response: AxiosResponse) => {
+  // তোমার ব্যাকেন্ড sendPaginated ফাংশন সরাসরি response.data-তে data, total ইত্যাদি পাঠায়
+  return {
+    data: (response.data?.data || []) as T[],
+    total: response.data?.total || 0,
+    page: response.data?.page || 1,
+    limit: response.data?.limit || 20,
+  };
+};
 
 if (typeof window !== "undefined") {
   loadStoredToken();

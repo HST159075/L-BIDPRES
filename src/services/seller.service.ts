@@ -10,13 +10,10 @@ export const sellerService = {
       .get<ApiResponse<SellerApplication>>("/seller/application-status")
       .then(extractData<SellerApplication>),
 
-  getMyListings: (page = 1, limit = 50) =>
-    api
-      .get("/listings/seller/mine", { params: { page, limit } })
-      .then((res) => {
-        // যদি extractPaginated কাজ না করে তবে সরাসরি ডাটা রিটার্ন করার এই লজিকটি দেখো
-        return res.data; 
-      }),
+getMyListings: (page = 1, limit = 20) =>
+  api
+    .get("/listings/seller/mine", { params: { page, limit } })
+    .then(extractPaginated<Listing>),
 
   createListing: (data: Record<string, unknown>) => 
     api.post("/listings", data),

@@ -43,21 +43,20 @@ export default function SellerListingsPage() {
   useEffect(() => {
     getMyListingsAction(1, 50)
       .then((res) => {
-       
-        const rawData = res.data?.data || res.data || [];
-        setListings(Array.isArray(rawData) ? rawData : []);
+        // res এখন extractPaginated থেকে আসা অবজেক্ট { data: [], total: ... }
+        const dataArray = res.data?.data || res.data || [];
+        setListings(Array.isArray(dataArray) ? dataArray : []);
       })
-      .catch(() => setListings([]))
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     if (!deleteId) return;
     setDeleting(true);
     try {
       const result = await deleteListingAction(deleteId);
       if (result?.error) throw new Error(result.error);
-      
+
       showSuccess("Listing deleted");
       setListings((prev) => prev.filter((l) => l.id !== deleteId));
     } catch (err) {
@@ -83,7 +82,9 @@ export default function SellerListingsPage() {
         <div className="pt-20 pb-16 max-w-4xl mx-auto px-4 sm:px-6">
           <ScrollReveal className="mt-8 mb-6 flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-[var(--color-foreground)]">My Listings</h1>
+              <h1 className="text-3xl font-bold text-[var(--color-foreground)]">
+                My Listings
+              </h1>
               <p className="text-[var(--color-muted-foreground)] mt-1">
                 {listings.length} total listings
               </p>
@@ -124,7 +125,9 @@ export default function SellerListingsPage() {
             ) : filteredListings.length === 0 ? (
               <div className="text-center py-16 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl">
                 <p className="font-medium text-[var(--color-muted-foreground)]">
-                  {search ? "No listings found matching your search" : "No listings yet"}
+                  {search
+                    ? "No listings found matching your search"
+                    : "No listings yet"}
                 </p>
                 {!search && (
                   <Link
@@ -153,10 +156,10 @@ export default function SellerListingsPage() {
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-xl bg-[var(--color-muted)] flex items-center justify-center shrink-0">
-                         <Search className="w-6 h-6 text-[var(--color-muted-foreground)] opacity-20" />
+                        <Search className="w-6 h-6 text-[var(--color-muted-foreground)] opacity-20" />
                       </div>
                     )}
-                    
+
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[var(--color-foreground)] truncate">
                         {listing.title}
@@ -175,7 +178,9 @@ export default function SellerListingsPage() {
                         </span>
                         {listing.auction?.currentPrice && (
                           <span className="text-xs font-medium text-[var(--color-foreground)]">
-                            {formatPriceEn(Number(listing.auction.currentPrice))}
+                            {formatPriceEn(
+                              Number(listing.auction.currentPrice),
+                            )}
                           </span>
                         )}
                       </div>
