@@ -17,31 +17,52 @@ export function getSocket(): Socket {
     socket = io(SOCKET_URL, {
       withCredentials: true,
       autoConnect: false,
+      // ✅ ৪00 এরর ফিক্স করতে সরাসরি websocket ব্যবহার করা হয়েছে
+      transports: ["websocket"], 
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10, // রেন্ডার সার্ভার স্লিপ মোড থেকে জাগতে সময় নিতে পারে
     });
+
+    // ডিবাগিং লগার (প্রয়োজন না হলে রিমুভ করতে পারেন)
+    socket.on("connect", () => console.log("✅ Socket Connected"));
+    socket.on("connect_error", (err) => console.error("❌ Socket Error:", err.message));
   }
   return socket;
 }
 
 export function connectSocket(token?: string) {
   const s = getSocket();
-  if (token) s.auth = { token };
-  if (!s.connected) s.connect();
+  
+  // ✅ ব্যাকেন্ডের auth.api.getSession লজিকের জন্য টোকেন সেট করা
+  if (token) {
+    s.auth = { token };
+  }
+  
+  if (!s.connected) {
+    s.connect();
+  }
   return s;
 }
 
 export function disconnectSocket() {
-  if (socket?.connected) {
+  if (socket) {
     socket.disconnect();
-    socket = null;
+    // ✅ রিসেট করা হয়েছে যাতে পরে নতুন টোকেন দিয়ে কানেক্ট করা যায়
+    socket = null; 
   }
 }
 
 // ── Auction room helpers ──────────────────────────────
 export function joinAuction(auctionId: string) {
-  getSocket().emit("join:auction", { auctionId });
+  const s = getSocket();
+  if (s.connected) {
+    s.emit("join:auction", { auctionId });
+  } else {
+    // কানেক্ট হওয়ার সাথে সাথে অটোমেটিক জয়েন হবে
+    s.once("connect", () => s.emit("join:auction", { auctionId }));
+    s.connect();
+  }
 }
 
 export function leaveAuction(auctionId: string) {
@@ -58,26 +79,31 @@ export function setAutoBidSocket(auctionId: string, maxAmount: number) {
 
 // ── Event listeners ───────────────────────────────────
 export function onBidNew(cb: (data: BidNewEvent) => void) {
-  getSocket().on("bid:new", cb);
-  return () => getSocket().off("bid:new", cb);
+  const s = getSocket();
+  s.on("bid:new", cb);
+  return () => s.off("bid:new", cb);
 }
 
 export function onBidOutbid(cb: (data: BidOutbidEvent) => void) {
-  getSocket().on("bid:outbid", cb);
-  return () => getSocket().off("bid:outbid", cb);
+  const s = getSocket();
+  s.on("bid:outbid", cb);
+  return () => s.off("bid:outbid", cb);
 }
 
 export function onAuctionEnded(cb: (data: AuctionEndedEvent) => void) {
-  getSocket().on("auction:ended", cb);
-  return () => getSocket().off("auction:ended", cb);
+  const s = getSocket();
+  s.on("auction:ended", cb);
+  return () => s.off("auction:ended", cb);
 }
 
 export function onAuctionCountdown(cb: (data: AuctionCountdownEvent) => void) {
-  getSocket().on("auction:countdown", cb);
-  return () => getSocket().off("auction:countdown", cb);
+  const s = getSocket();
+  s.on("auction:countdown", cb);
+  return () => s.off("auction:countdown", cb);
 }
 
 export function onAuctionLive(cb: (data: { auctionId: string }) => void) {
-  getSocket().on("auction:live", cb);
-  return () => getSocket().off("auction:live", cb);
+  const s = getSocket();
+  s.on("auction:live", cb);
+  return () => s.off("auction:live", cb);
 }

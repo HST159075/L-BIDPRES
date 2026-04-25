@@ -3,16 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 
 interface UseInfiniteScrollOptions {
-  hasMore:    boolean;
+  hasMore: boolean;
   onLoadMore: () => void;
   threshold?: number;
 }
 
 export function useInfiniteScroll({
-  hasMore, onLoadMore, threshold = 300,
+  hasMore,
+  onLoadMore,
+  threshold = 300,
 }: UseInfiniteScrollOptions) {
   const [isFetching, setIsFetching] = useState(false);
-  const sentinelRef                 = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -26,7 +28,7 @@ export function useInfiniteScroll({
           setIsFetching(false);
         }
       },
-      { rootMargin: `${threshold}px` }
+      { rootMargin: `${threshold}px` },
     );
 
     observer.observe(el);

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getSecondsLeft }              from "@/lib/utils";
+import { getSecondsLeft } from "@/lib/utils";
 
 export function useCountdown(endTime: string) {
   const [seconds, setSeconds] = useState(() => getSecondsLeft(endTime));
-  const intervalRef           = useRef<ReturnType<typeof setInterval> | null>(null);
-  const endTimeRef            = useRef(endTime);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const endTimeRef = useRef(endTime);
 
   useEffect(() => {
     endTimeRef.current = endTime;
