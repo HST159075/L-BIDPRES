@@ -46,7 +46,7 @@ export default function SellerListingsPage() {
       setLoading(true);
       try {
         const res = await getMyListingsAction(1, 50);
-        const dataArray = res.data?.data || res.data || [];
+        const dataArray = res.data?.data ?? [];
         setListings(Array.isArray(dataArray) ? dataArray : []);
       } catch {
         setListings([]);

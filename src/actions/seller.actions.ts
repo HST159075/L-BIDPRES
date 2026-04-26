@@ -7,46 +7,42 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 async function authedFetch(path: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
-  
-  // Apnar manual login 'session' cookie-ke priority deya hoyeche
-  const sessionToken = 
-    cookieStore.get("session")?.value || 
+
+  // Frontend "session" cookie-te token save kore (api.ts e Cookies.set("session", token))
+  // Backend "better-auth.session_token" cookie ba Bearer token accept kore
+  const token =
+    cookieStore.get("session")?.value ||
     cookieStore.get("better-auth.session_token")?.value ||
     cookieStore.get("__Secure-better-auth.session_token")?.value;
+
+  if (!token) {
+    console.error(`[authedFetch] No token found for: ${path}`);
+    return { error: "Not authenticated" };
+  }
 
   const res = await fetch(`${API}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      // Backend JWT expect korle Authorization header-e Bearer token thaka dorkar
-      ...(sessionToken ? { "Authorization": `Bearer ${sessionToken}` } : {}),
+      // Bearer token pathao — backend authenticate.ts eta accept kore
+      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
     cache: "no-store",
   });
 
-  // Safe JSON parsing jate error na hoy
   const json = await res.json().catch(() => ({}));
-  
-  if (!res.ok) return { error: json.message || "Request failed" };
-  return { data: json.data };
+
+  if (!res.ok) {
+    console.error(`[authedFetch] ${res.status} on ${path}:`, json);
+    return { error: json.message || `HTTP ${res.status}` };
+  }
+
+  return { data: json };
 }
 
-export async function applyForSellerAction(data: {
-  idCardUrl: string;
-  profilePhotoUrl: string;
-}) {
-  const result = await authedFetch("/seller/apply", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-  // Folder structure-e folder-er nam 'sapply' tai path thik kora holo
-  if (!result.error) revalidatePath("/seller/sapply");
-  return result;
-}
-
-export async function getApplicationStatusAction() {
-  return authedFetch("/seller/application-status");
+export async function getMyListingsAction(page = 1, limit = 20) {
+  return authedFetch(`/listings/seller/mine?page=${page}&limit=${limit}`);
 }
 
 export async function createListingAction(data: Record<string, unknown>) {
@@ -54,17 +50,17 @@ export async function createListingAction(data: Record<string, unknown>) {
     method: "POST",
     body: JSON.stringify(data),
   });
-  
   if (!result.error) {
-    // Apnar image-e dekhlam folder-er nam 'slistings' ebong 'sdashboard'
-    // Tai ei path gulo revalidate korle data sothik bhabe update hobe
     revalidatePath("/slistings");
     revalidatePath("/sdashboard");
   }
   return result;
 }
 
-export async function updateListingAction(id: string, data: Record<string, unknown>) {
+export async function updateListingAction(
+  id: string,
+  data: Record<string, unknown>,
+) {
   const result = await authedFetch(`/listings/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -82,7 +78,18 @@ export async function deleteListingAction(id: string) {
   return result;
 }
 
-export async function getMyListingsAction(page = 1, limit = 20) {
-  // Backend standard query parameter
-  return authedFetch(`/listings/seller/mine?page=${page}&limit=${limit}`);
+export async function applyForSellerAction(data: {
+  idCardUrl: string;
+  profilePhotoUrl: string;
+}) {
+  const result = await authedFetch("/seller/apply", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!result.error) revalidatePath("/seller/sapply");
+  return result;
+}
+
+export async function getApplicationStatusAction() {
+  return authedFetch("/seller/application-status");
 }
