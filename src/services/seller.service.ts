@@ -2,8 +2,8 @@ import api, { extractData, extractPaginated } from "@/lib/api";
 import type { Listing, SellerApplication, ApiResponse } from "@/types";
 
 export const sellerService = {
-  apply: (data: { idCardUrl: string; profilePhotoUrl: string }) =>
-    api.post("/seller/apply", data),
+ apply: (data: { idCardUrl: string; profilePhotoUrl: string }) =>
+  api.post("/seller/apply", data),
 
   getApplicationStatus: () =>
     api

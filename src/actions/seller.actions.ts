@@ -43,11 +43,11 @@ export async function applyForSellerAction(data: {
   idCardUrl: string;
   profilePhotoUrl: string;
 }) {
-  const result = await authedFetch("/seller/apply", {
+  const result = await authedFetch("/sapply", {
     method: "POST",
     body: JSON.stringify(data),
   });
-  if (!result.error) revalidatePath("/seller/sapply");
+  if (!result.error) revalidatePath("/sapply");
   return result;
 }
 
@@ -55,8 +55,6 @@ export async function getApplicationStatusAction() {
   return authedFetch("/seller/application-status");
 }
 
-// ── Listings (getMyListings & createListing এখন sellerService দিয়ে করুন) ──
-// এই দুটো শুধু fallback হিসেবে রাখা হয়েছে, সরাসরি use করবেন না
 export async function getMyListingsAction(page = 1, limit = 20) {
   return authedFetch(`/listings/seller/mine?page=${page}&limit=${limit}`);
 }

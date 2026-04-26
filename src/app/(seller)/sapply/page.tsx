@@ -16,6 +16,7 @@ import {
 } from "@/actions/seller.actions";
 import { showSuccess, showError } from "@/lib/error-handler";
 import { useEffect } from "react";
+import { sellerService } from "@/services/seller.service";
 
 const applySchema = z.object({
   idCardUrl: z.string().url("Valid image URL required"),
@@ -39,42 +40,34 @@ export default function SellerApplyPage() {
   const isSeller = user?.role === "seller" || user?.role === "admin";
   const displayAppStatus = isSeller ? { status: "approved" } : appStatus;
 
-  useEffect(() => {
-    if (!user || isSeller) return;
-    getApplicationStatusAction()
-      .then((res) => {
-        // error মানে application নেই — null set করুন
-        if (res.error) {
-          setAppStatus(null);
-          return;
-        }
-        // res.data = { success, data: { status, id, ... } }
-        setAppStatus(res.data?.data || null);
-      })
-      .catch(() => setAppStatus(null));
-  }, [user, isSeller]);
+useEffect(() => {
+  if (!user || isSeller) return;
+  sellerService
+    .getApplicationStatus()
+    .then((data) => setAppStatus(data || null))
+    .catch(() => setAppStatus(null));
+}, [user, isSeller]);
 
   const canApply = (user?.purchaseCount || 0) >= 5;
 
-  const onSubmit = async (data: ApplyForm) => {
-    if (!canApply) {
-      showError({
-        message: "You need at least 5 purchases to apply for seller status",
-      });
-      return;
-    }
-    setIsApplying(true);
-    try {
-      await applyForSellerAction(data);
-      showSuccess("Application submitted! We'll review it shortly.");
-      setAppStatus({ status: "pending", id: "new" });
-      form.reset();
-    } catch (err) {
-      showError(err);
-    } finally {
-      setIsApplying(false);
-    }
-  };
+ const onSubmit = async (data: ApplyForm) => {
+  if (!canApply) {
+    showError({ message: "You need at least 5 purchases to apply for seller status" });
+    return;
+  }
+  setIsApplying(true);
+  try {
+    // ✅ Server Action বাদ — axios দিয়ে সরাসরি
+    await sellerService.apply(data);
+    showSuccess("Application submitted! We'll review it shortly.");
+    setAppStatus({ status: "pending", id: "new" });
+    form.reset();
+  } catch (err) {
+    showError(err);
+  } finally {
+    setIsApplying(false);
+  }
+};
 
   if (authLoading) {
     return (
