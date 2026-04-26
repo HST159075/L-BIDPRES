@@ -33,11 +33,15 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    getUsersAction(1, search)
-      .then((res) => setUsers((res.data as { data: User[] }).data || []))
-      .catch(() => setUsers([]))
-      .finally(() => setUsersLoading(false));
-  }, [search]);
+  getUsersAction(1, search)
+    .then((res) => {
+      // res.data = { success, data: [...], pagination }
+      const list = res.data?.data ?? [];
+      setUsers(Array.isArray(list) ? list : []);
+    })
+    .catch(() => setUsers([]))
+    .finally(() => setUsersLoading(false));
+}, [search]);
 
   const handleAddStrike = async (userId: string) => {
     try {

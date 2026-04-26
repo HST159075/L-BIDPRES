@@ -7,10 +7,8 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 async function adminFetch(path: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
-  
-  // 'session' cookie priority ditte hobe, tarpor better-auth check hobe
-  const sessionToken = 
-    cookieStore.get("session")?.value || 
+  const sessionToken =
+    cookieStore.get("session")?.value ||
     cookieStore.get("better-auth.session_token")?.value ||
     cookieStore.get("__Secure-better-auth.session_token")?.value;
 
@@ -18,33 +16,31 @@ async function adminFetch(path: string, options: RequestInit = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      // Backend JWT expect korle Authorization header-e Bearer token thaka dorkar
-      ...(sessionToken ? { "Authorization": `Bearer ${sessionToken}` } : {}),
+      ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
       ...options.headers,
     },
     cache: "no-store",
   });
 
-  // Response check and safe JSON parsing
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     return { error: errorData.message || "Failed to fetch data" };
   }
-
   const json = await res.json();
-  return { data: json.data };
+  return { data: json };
 }
 
 export async function getAnalyticsAction() {
   return adminFetch("/admin/analytics");
 }
 
+
 export async function getUsersAction(page = 1, search?: string) {
-  const params = new URLSearchParams({ 
-    page: String(page), 
-    ...(search ? { search } : {}) 
+  const params = new URLSearchParams({
+    page: String(page),
+    ...(search ? { search } : {}),
   });
-  return adminFetch(`/users?${params}`); // API path admin prefix thaka bhalo
+  return adminFetch(`/admin/users?${params}`);
 }
 
 export async function getPendingApplicationsAction(page = 1) {
@@ -52,28 +48,25 @@ export async function getPendingApplicationsAction(page = 1) {
 }
 
 export async function approveApplicationAction(id: string) {
-  const result = await adminFetch(`/admin/applications/${id}/approve`, { method: "PUT" });
+  const result = await adminFetch(`/admin/seller-applications/${id}/approve`, { method: "PUT" });
   if (!result.error) {
-    // Apnar structure onujayi application page revalidate hobe
     revalidatePath("/applications");
-    revalidatePath("/dashboard"); // Analytics update korar jonno
+    revalidatePath("/dashboard");
   }
   return result;
 }
 
 export async function rejectApplicationAction(id: string, reason: string) {
-  const result = await adminFetch(`/admin/applications/${id}/reject`, {
+  const result = await adminFetch(`/admin/seller-applications/${id}/reject`, {
     method: "PUT",
     body: JSON.stringify({ reason }),
   });
-  if (!result.error) {
-    revalidatePath("/applications");
-  }
+  if (!result.error) revalidatePath("/applications");
   return result;
 }
 
 export async function addStrikeAction(userId: string, reason: string, description?: string) {
-  const result = await adminFetch(`/users/${userId}/strike`, {
+  const result = await adminFetch(`/admin/users/${userId}/strike`, {
     method: "PUT",
     body: JSON.stringify({ reason, description }),
   });
@@ -97,9 +90,7 @@ export async function banUserAction(userId: string, reason: string) {
 }
 
 export async function unbanUserAction(userId: string) {
-  const result = await adminFetch(`/users/${userId}/unban`, { method: "PUT" });
-  if (!result.error) {
-    revalidatePath("/users");
-  }
+  const result = await adminFetch(`/admin/users/${userId}/unban`, { method: "PUT" });
+  if (!result.error) revalidatePath("/users");
   return result;
 }
