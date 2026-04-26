@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { ROUTES } from "@/config/constants";
 
@@ -11,6 +11,7 @@ export default function SellerLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isInitialized, isLoading } = useAuthStore();
 
   useEffect(() => {
@@ -19,10 +20,13 @@ export default function SellerLayout({
       router.replace(ROUTES.login);
       return;
     }
+    // ✅ sapply page-এ থাকলে redirect করবে না
+    if (pathname === "/sapply") return;
+    
     if (user.role !== "seller" && user.role !== "admin") {
       router.replace(ROUTES.sellerApply);
     }
-  }, [user, isInitialized, isLoading, router]);
+  }, [user, isInitialized, isLoading, router, pathname]);
 
   if (!isInitialized || isLoading) {
     return (
@@ -31,6 +35,9 @@ export default function SellerLayout({
       </div>
     );
   }
+
+  // ✅ sapply page সবার জন্য দেখাবে
+  if (pathname === "/sapply") return <>{children}</>;
 
   if (!user || (user.role !== "seller" && user.role !== "admin")) return null;
   return <>{children}</>;
