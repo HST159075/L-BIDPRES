@@ -42,7 +42,15 @@ export default function SellerApplyPage() {
   useEffect(() => {
     if (!user || isSeller) return;
     getApplicationStatusAction()
-      .then((res) => setAppStatus(res.data || null))
+      .then((res) => {
+        // error মানে application নেই — null set করুন
+        if (res.error) {
+          setAppStatus(null);
+          return;
+        }
+        // res.data = { success, data: { status, id, ... } }
+        setAppStatus(res.data?.data || null);
+      })
       .catch(() => setAppStatus(null));
   }, [user, isSeller]);
 
