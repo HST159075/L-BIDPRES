@@ -10,20 +10,19 @@ export const sellerService = {
       .get<ApiResponse<SellerApplication>>("/seller/application-status")
       .then(extractData<SellerApplication>),
 
-getMyListings: (page = 1, limit = 20) =>
-  api
-    .get("/listings/seller/mine", { params: { page, limit } })
-    .then(extractPaginated<Listing>),
+  getMyListings: (page = 1, limit = 20) =>
+    api
+      .get("/listings/seller/mine", { params: { page, limit } })
+      .then(extractPaginated<Listing>),
+      
+  getListing: (id: string) => api.get(`/listings/${id}`),
 
-  createListing: (data: Record<string, unknown>) => 
-    api.post("/listings", data),
+  createListing: (data: Record<string, unknown>) => api.post("/listings", data),
 
   updateListing: (id: string, data: Record<string, unknown>) =>
     api.put(`/listings/${id}`, data),
 
-  deleteListing: (id: string) => 
-    api.delete(`/listings/${id}`),
+  deleteListing: (id: string) => api.delete(`/listings/${id}`),
 
-  getNotifications: () => 
-    api.get("/notifications").then(extractData),
+  getNotifications: () => api.get("/notifications").then(extractData),
 };

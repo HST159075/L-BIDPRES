@@ -8,8 +8,7 @@ import { SmoothScroll } from "@/components/animations/SmoothScroll";
 import { ListingForm } from "@/components/seller/ListingForm";
 import type { ListingFormData } from "@/components/seller/ListingForm";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { getListingAction } from "@/actions/auction.actions";
-import { updateListingAction } from "@/actions/seller.actions";
+import { sellerService } from "@/services/seller.service";
 import { showSuccess, showError } from "@/lib/error-handler";
 import { ROUTES } from "@/config/constants";
 import type { Listing } from "@/types";
@@ -20,7 +19,7 @@ interface PageProps {
 
 export default function EditListingPage({ params }: PageProps) {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useRequireAuth("seller");
+  const { isLoading: authLoading } = useRequireAuth("seller");
   const [listing, setListing] = useState<Listing | null>(null);
   const [fetching, setFetching] = useState(true);
   const [listingId, setListingId] = useState<string>("");
@@ -28,29 +27,32 @@ export default function EditListingPage({ params }: PageProps) {
   useEffect(() => {
     params.then(({ id }) => {
       setListingId(id);
-      getListingAction(id)
-        .then((data) => setListing(data))
+      // ✅ axios দিয়ে — token automatically যাবে
+      sellerService
+        .getListing(id)
+        .then((res) => setListing(res.data.data))
         .catch(() => showError({ message: "Listing not found" }))
         .finally(() => setFetching(false));
     });
   }, [params]);
 
-const handleSubmit = async (data: ListingFormData) => {
-  try {
-    const payload = {
-      ...data,
-      startTime: new Date(data.startTime).toISOString(),
-      endTime: new Date(data.endTime).toISOString(),
-      videoUrl: data.videoUrl?.trim() || undefined,
-    };
-    await updateListingAction(listingId, payload as Record<string, unknown>);
-    showSuccess("Listing updated!");
-    router.push(ROUTES.sellerListings);
-  } catch (err) {
-    showError(err);
-    throw err;
-  }
-};
+  const handleSubmit = async (data: ListingFormData) => {
+    try {
+      const payload = {
+        ...data,
+        startTime: new Date(data.startTime).toISOString(),
+        endTime: new Date(data.endTime).toISOString(),
+        videoUrl: data.videoUrl?.trim() || undefined,
+      };
+      // ✅ axios দিয়ে সরাসরি
+      await sellerService.updateListing(listingId, payload as Record<string, unknown>);
+      showSuccess("Listing updated!");
+      router.push(ROUTES.sellerListings);
+    } catch (err) {
+      showError(err);
+      throw err;
+    }
+  };
 
   if (authLoading || fetching) {
     return (
@@ -105,7 +107,6 @@ const handleSubmit = async (data: ListingFormData) => {
             <h1 className="text-3xl font-bold">Edit Listing</h1>
             <p className="text-muted-foreground mt-1">{listing.title}</p>
           </ScrollReveal>
-
           <ScrollReveal>
             <ListingForm
               defaultValues={defaultValues}
