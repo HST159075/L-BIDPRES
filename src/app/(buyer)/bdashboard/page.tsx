@@ -20,21 +20,55 @@ import {
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { bidService } from "@/services/bid.service";
+import { paymentService } from "@/services/payment.service";
+import { showError } from "@/lib/error-handler";
 import { formatPriceEn, formatTimeAgo } from "@/lib/utils";
 import { ROUTES } from "@/config/constants";
+import { useRouter } from "next/navigation";
+
+interface Bid {
+  id: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+  auction?: { listing?: { title?: string } };
+}
 
 export default function BuyerDashboardPage() {
   const { user, isLoading } = useRequireAuth();
-  const [bids, setBids] = useState<unknown[]>([]);
+  const router = useRouter();
+  const [bids, setBids] = useState<Bid[]>([]);
   const [bidsLoading, setBidsLoading] = useState(true);
+  const [payingBidId, setPayingBidId] = useState<string | null>(null);
 
+  // ✅ একটাই useEffect
   useEffect(() => {
     bidService
       .getMyBids()
-      .then((res) => setBids((res.data as { data: unknown[] }).data || []))
+      .then((res) => {
+        const list = res.data?.data ?? [];
+        setBids(Array.isArray(list) ? list : []);
+      })
       .catch(() => setBids([]))
       .finally(() => setBidsLoading(false));
   }, []);
+
+  const handlePayment = async (bidId: string) => {
+    setPayingBidId(bidId);
+    try {
+      const res = await paymentService.initiate({
+        bidId,
+        gateway: "sslcommerz",
+      });
+      const { paymentUrl } = res.data.data;
+      // ✅ window.location.href এর বদলে:
+      router.push(paymentUrl);
+    } catch (err) {
+      showError(err);
+    } finally {
+      setPayingBidId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -59,9 +93,7 @@ export default function BuyerDashboardPage() {
     },
     {
       label: "Active Bids",
-      value: bids.filter(
-        (b: unknown) => (b as { status: string }).status === "active",
-      ).length,
+      value: bids.filter((b) => b.status === "active").length,
       icon: TrendingUp,
       color: "text-blue-500",
     },
@@ -81,7 +113,6 @@ export default function BuyerDashboardPage() {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="pt-20 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <ScrollReveal className="mt-8 mb-10">
             <div className="flex items-start justify-between">
               <div>
@@ -102,7 +133,6 @@ export default function BuyerDashboardPage() {
             </div>
           </ScrollReveal>
 
-          {/* Stats */}
           <StaggerChildren className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
             {stats.map((stat) => (
               <StaggerItem key={stat.label}>
@@ -123,7 +153,6 @@ export default function BuyerDashboardPage() {
             ))}
           </StaggerChildren>
 
-          {/* Seller progress */}
           {user?.role === "buyer" && (
             <ScrollReveal className="mb-10">
               <div className="bg-card border border-border rounded-2xl p-6">
@@ -152,7 +181,6 @@ export default function BuyerDashboardPage() {
             </ScrollReveal>
           )}
 
-          {/* Recent bids */}
           <ScrollReveal>
             <div className="bg-card border border-border rounded-2xl p-6">
               <div className="flex items-center justify-between mb-5">
@@ -186,51 +214,51 @@ export default function BuyerDashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {(
-                    bids as Array<{
-                      id: string;
-                      amount: number;
-                      status: string;
-                      createdAt: string;
-                      auction?: { listing?: { title?: string } };
-                    }>
-                  )
-                    .slice(0, 5)
-                    .map((bid) => (
+                  {bids.slice(0, 5).map((bid) => (
+                    <div
+                      key={bid.id}
+                      className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl"
+                    >
                       <div
-                        key={bid.id}
-                        className="flex items-center gap-4 p-3 bg-muted/50 rounded-xl"
-                      >
-                        <div
-                          className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                            bid.status === "active"
-                              ? "bg-green-500"
-                              : bid.status === "won"
-                                ? "bg-blue-500"
-                                : bid.status === "outbid"
-                                  ? "bg-red-500"
-                                  : "bg-gray-400"
-                          }`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {bid.auction?.listing?.title || "Auction"}
-                          </p>
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="w-3 h-3" />{" "}
-                            {formatTimeAgo(bid.createdAt)}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-bold text-sm">
-                            {formatPriceEn(bid.amount)}
-                          </p>
-                          <p className="text-xs capitalize text-muted-foreground">
-                            {bid.status}
-                          </p>
-                        </div>
+                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                          bid.status === "active"
+                            ? "bg-green-500"
+                            : bid.status === "won"
+                              ? "bg-blue-500"
+                              : bid.status === "outbid"
+                                ? "bg-red-500"
+                                : "bg-gray-400"
+                        }`}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {bid.auction?.listing?.title || "Auction"}
+                        </p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />{" "}
+                          {formatTimeAgo(bid.createdAt)}
+                        </p>
                       </div>
-                    ))}
+                      <div className="text-right shrink-0">
+                        <p className="font-bold text-sm">
+                          {formatPriceEn(bid.amount)}
+                        </p>
+                        <p className="text-xs capitalize text-muted-foreground">
+                          {bid.status}
+                        </p>
+                        {/* ✅ Won হলে Pay Now */}
+                        {bid.status === "won" && (
+                          <button
+                            onClick={() => handlePayment(bid.id)}
+                            disabled={payingBidId === bid.id}
+                            className="mt-1 px-3 py-1 bg-bid-500 hover:bg-bid-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            {payingBidId === bid.id ? "Loading..." : "Pay Now"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
