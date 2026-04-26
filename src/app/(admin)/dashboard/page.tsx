@@ -40,12 +40,14 @@ export default function AdminDashboardPage() {
   const [analytics, setAnalytics] = useState<Analytics>({});
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    getAnalyticsAction()
-      .then((res) => setAnalytics((res.data as Analytics) || {}))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+useEffect(() => {
+  getAnalyticsAction()
+    .then((res) => {
+      setAnalytics(res.data?.data || {});
+    })
+    .catch(() => {})
+    .finally(() => setLoading(false));
+}, []);
 
   if (authLoading) {
     return (
