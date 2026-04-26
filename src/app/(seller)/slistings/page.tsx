@@ -45,7 +45,6 @@ export default function SellerListingsPage() {
     const fetchListings = async () => {
       setLoading(true);
       try {
-        // ✅ axios — localStorage থেকে token নিজেই লাগায়
         const result = await sellerService.getMyListings(1, 50);
         setListings(Array.isArray(result.data) ? result.data : []);
         setTotal(result.total ?? 0);
