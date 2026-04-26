@@ -35,16 +35,22 @@ export default function EditListingPage({ params }: PageProps) {
     });
   }, [params]);
 
-  const handleSubmit = async (data: ListingFormData) => {
-    try {
-      await updateListingAction(listingId, data as Record<string, unknown>);
-      showSuccess("Listing updated!");
-      router.push(ROUTES.sellerListings);
-    } catch (err) {
-      showError(err);
-      throw err;
-    }
-  };
+const handleSubmit = async (data: ListingFormData) => {
+  try {
+    const payload = {
+      ...data,
+      startTime: new Date(data.startTime).toISOString(),
+      endTime: new Date(data.endTime).toISOString(),
+      videoUrl: data.videoUrl?.trim() || undefined,
+    };
+    await updateListingAction(listingId, payload as Record<string, unknown>);
+    showSuccess("Listing updated!");
+    router.push(ROUTES.sellerListings);
+  } catch (err) {
+    showError(err);
+    throw err;
+  }
+};
 
   if (authLoading || fetching) {
     return (

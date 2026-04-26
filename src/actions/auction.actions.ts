@@ -8,13 +8,16 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 async function serverFetch<T>(path: string, options: RequestInit = {}): Promise<T | null> {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("better-auth.session_token");
+    const token =
+      cookieStore.get("session")?.value ||
+      cookieStore.get("better-auth.session_token")?.value ||
+      cookieStore.get("__Secure-better-auth.session_token")?.value;
 
     const res = await fetch(`${API}${path}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        ...(sessionCookie ? { Cookie: `better-auth.session_token=${sessionCookie.value}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
       next: { revalidate: 30 },
