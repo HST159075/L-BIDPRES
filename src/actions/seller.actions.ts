@@ -43,7 +43,7 @@ export async function applyForSellerAction(data: {
   idCardUrl: string;
   profilePhotoUrl: string;
 }) {
-  const result = await authedFetch("/sapply", {
+  const result = await authedFetch("/seller/apply", {
     method: "POST",
     body: JSON.stringify(data),
   });
