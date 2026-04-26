@@ -33,7 +33,10 @@ export default function AdminApplicationsPage() {
 
   useEffect(() => {
     getPendingApplicationsAction(1)
-      .then((res) => setApps((res.data as { data: SellerApp[] }).data || []))
+      .then((res) => {
+        const list = res.data?.data ?? [];
+        setApps(Array.isArray(list) ? list : []);
+      })
       .catch(() => setApps([]))
       .finally(() => setAppsLoading(false));
   }, []);
