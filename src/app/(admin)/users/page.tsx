@@ -33,25 +33,36 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-  getUsersAction(1, search)
-    .then((res) => {
-      // res.data = { success, data: [...], pagination }
-      const list = res.data?.data ?? [];
-      setUsers(Array.isArray(list) ? list : []);
-    })
-    .catch(() => setUsers([]))
-    .finally(() => setUsersLoading(false));
-}, [search]);
+    getUsersAction(1, search)
+      .then((res) => {
+        // res.data = { success, data: [...], pagination }
+        const list = res.data?.data ?? [];
+        setUsers(Array.isArray(list) ? list : []);
+      })
+      .catch(() => setUsers([]))
+      .finally(() => setUsersLoading(false));
+  }, [search]);
+  const refetchUsers = () => {
+    setUsersLoading(true);
+    getUsersAction(1, search)
+      .then((res) => {
+        const list = res.data?.data ?? [];
+        setUsers(Array.isArray(list) ? list : []);
+      })
+      .finally(() => setUsersLoading(false));
+  };
 
   const handleAddStrike = async (userId: string) => {
     try {
       await addStrikeAction(userId, "violation", "Admin strike");
       showSuccess("Strike added");
-      setUsers(
-        users.map((u) =>
-          u.id === userId ? { ...u, strikeCount: u.strikeCount + 1 } : u,
-        ),
-      );
+      setUsersLoading(true);
+      getUsersAction(1, search)
+        .then((res) => {
+          const list = res.data?.data ?? [];
+          setUsers(Array.isArray(list) ? list : []);
+        })
+        .finally(() => setUsersLoading(false));
     } catch (err) {
       showError(err);
     }
@@ -61,9 +72,7 @@ export default function AdminUsersPage() {
     try {
       await banUserAction(userId, "Admin decision");
       showSuccess("User banned");
-      setUsers(
-        users.map((u) => (u.id === userId ? { ...u, isBanned: true } : u)),
-      );
+      refetchUsers();
     } catch (err) {
       showError(err);
     }
@@ -73,14 +82,11 @@ export default function AdminUsersPage() {
     try {
       await unbanUserAction(userId);
       showSuccess("User unbanned");
-      setUsers(
-        users.map((u) => (u.id === userId ? { ...u, isBanned: false } : u)),
-      );
+      refetchUsers();
     } catch (err) {
       showError(err);
     }
   };
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">

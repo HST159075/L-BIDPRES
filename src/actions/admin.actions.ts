@@ -68,7 +68,10 @@ export async function rejectApplicationAction(id: string, reason: string) {
 export async function addStrikeAction(userId: string, reason: string, description?: string) {
   const result = await adminFetch(`/admin/users/${userId}/strike`, {
     method: "PUT",
-    body: JSON.stringify({ reason, description }),
+    body: JSON.stringify({ 
+      reason: "admin_manual",  
+      description: description || reason,
+    }),
   });
   if (!result.error) {
     revalidatePath("/users");
