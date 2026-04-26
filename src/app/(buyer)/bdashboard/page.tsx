@@ -53,22 +53,18 @@ export default function BuyerDashboardPage() {
       .finally(() => setBidsLoading(false));
   }, []);
 
-  const handlePayment = async (bidId: string) => {
-    setPayingBidId(bidId);
-    try {
-      const res = await paymentService.initiate({
-        bidId,
-        gateway: "sslcommerz",
-      });
-      const { paymentUrl } = res.data.data;
-      // ✅ window.location.href এর বদলে:
-      router.push(paymentUrl);
-    } catch (err) {
-      showError(err);
-    } finally {
-      setPayingBidId(null);
-    }
-  };
+ const handlePayment = async (bidId: string, gateway: "sslcommerz" | "bkash") => {
+  setPayingBidId(bidId);
+  try {
+    const res = await paymentService.initiate({ bidId, gateway });
+    const { paymentUrl } = res.data.data;
+    router.push(paymentUrl);
+  } catch (err) {
+    showError(err);
+  } finally {
+    setPayingBidId(null);
+  }
+};
 
   if (isLoading) {
     return (
@@ -248,14 +244,23 @@ export default function BuyerDashboardPage() {
                         </p>
                         {/* ✅ Won হলে Pay Now */}
                         {bid.status === "won" && (
-                          <button
-                            onClick={() => handlePayment(bid.id)}
-                            disabled={payingBidId === bid.id}
-                            className="mt-1 px-3 py-1 bg-bid-500 hover:bg-bid-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            {payingBidId === bid.id ? "Loading..." : "Pay Now"}
-                          </button>
-                        )}
+  <div className="mt-1 flex gap-1">
+    <button
+      onClick={() => handlePayment(bid.id, "sslcommerz")}
+      disabled={payingBidId === bid.id}
+      className="px-2 py-1 bg-bid-500 hover:bg-bid-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+    >
+      {payingBidId === bid.id ? "..." : "SSLCommerz"}
+    </button>
+    <button
+      onClick={() => handlePayment(bid.id, "bkash")}
+      disabled={payingBidId === bid.id}
+      className="px-2 py-1 bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+    >
+      {payingBidId === bid.id ? "..." : "bKash"}
+    </button>
+  </div>
+)}
                       </div>
                     </div>
                   ))}
