@@ -15,10 +15,18 @@ export default function NewListingPage() {
   const router = useRouter();
   useRequireAuth("seller");
 
-  const handleSubmit = async (data: ListingFormData) => {
+ const handleSubmit = async (data: ListingFormData) => {
     try {
-      // ✅ Server Action বাদ — axios সরাসরি Bearer token পাঠায়
-      await sellerService.createListing(data as Record<string, unknown>);
+      const payload = {
+        ...data,
+        // datetime-local → ISO string
+        startTime: new Date(data.startTime).toISOString(),
+        endTime: new Date(data.endTime).toISOString(),
+        // empty string হলে videoUrl পাঠাবে না
+        videoUrl: data.videoUrl?.trim() || undefined,
+      };
+
+      await sellerService.createListing(payload as Record<string, unknown>);
       showSuccess("Listing created successfully!");
       router.push(ROUTES.sellerListings);
     } catch (err) {
@@ -26,6 +34,7 @@ export default function NewListingPage() {
       throw err;
     }
   };
+
 
   return (
     <SmoothScroll>
