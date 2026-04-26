@@ -9,10 +9,8 @@ import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useRequireAuth } from "@/hooks/useAuth";
-import {
-  getMyListingsAction,
-  deleteListingAction,
-} from "@/actions/seller.actions";
+import { sellerService } from "@/services/seller.service";
+import { deleteListingAction } from "@/actions/seller.actions";
 import { showSuccess, showError } from "@/lib/error-handler";
 import { formatPriceEn } from "@/lib/utils";
 import { ROUTES } from "@/config/constants";
@@ -26,45 +24,40 @@ interface Listing {
 }
 
 export default function SellerListingsPage() {
-  const { user, isLoading: authLoading } = useRequireAuth("seller");
+  const { isLoading: authLoading } = useRequireAuth("seller");
   const [listings, setListings] = useState<Listing[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // ✅ Derived State: Filtered listings based on search
-  const filteredListings = useMemo(() => {
-    return listings.filter((l) =>
-      l.title.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [listings, search]);
+  const filteredListings = useMemo(
+    () =>
+      listings.filter((l) =>
+        l.title.toLowerCase().includes(search.toLowerCase()),
+      ),
+    [listings, search],
+  );
 
   useEffect(() => {
     const fetchListings = async () => {
       setLoading(true);
       try {
-        const res = await getMyListingsAction(1, 50);
-        const dataArray = res.data?.data ?? [];
-        setListings(Array.isArray(dataArray) ? dataArray : []);
-      } catch {
+        // ✅ Server Action বাদ — সরাসরি axios দিয়ে fetch
+        const result = await sellerService.getMyListings(1, 50);
+        setListings(Array.isArray(result.data) ? result.data : []);
+        setTotal(result.total ?? result.data?.length ?? 0);
+      } catch (e) {
+        console.error("Failed to fetch listings:", e);
         setListings([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchListings();
   }, [refreshKey]);
-
-  // Auto-refresh every 3 seconds to show newly created listings
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRefreshKey((prev) => prev + 1);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleDelete = async (): Promise<void> => {
     if (!deleteId) return;
@@ -72,9 +65,9 @@ export default function SellerListingsPage() {
     try {
       const result = await deleteListingAction(deleteId);
       if (result?.error) throw new Error(result.error);
-
       showSuccess("Listing deleted");
       setListings((prev) => prev.filter((l) => l.id !== deleteId));
+      setTotal((prev) => prev - 1);
     } catch (err) {
       showError(err);
     } finally {
@@ -102,7 +95,7 @@ export default function SellerListingsPage() {
                 My Listings
               </h1>
               <p className="text-[var(--color-muted-foreground)] mt-1">
-                {listings.length} total listings
+                {total} total listings
               </p>
             </div>
             <Link
@@ -113,7 +106,6 @@ export default function SellerListingsPage() {
             </Link>
           </ScrollReveal>
 
-          {/* Search Box */}
           <ScrollReveal className="mb-5">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-muted-foreground)]" />
@@ -127,7 +119,6 @@ export default function SellerListingsPage() {
             </div>
           </ScrollReveal>
 
-          {/* Listings List */}
           <ScrollReveal>
             {loading ? (
               <div className="space-y-3">
@@ -141,9 +132,7 @@ export default function SellerListingsPage() {
             ) : filteredListings.length === 0 ? (
               <div className="text-center py-16 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl">
                 <p className="font-medium text-[var(--color-muted-foreground)]">
-                  {search
-                    ? "No listings found matching your search"
-                    : "No listings yet"}
+                  {search ? "No listings found matching your search" : "No listings yet"}
                 </p>
                 {!search && (
                   <Link
@@ -175,7 +164,6 @@ export default function SellerListingsPage() {
                         <Search className="w-6 h-6 text-[var(--color-muted-foreground)] opacity-20" />
                       </div>
                     )}
-
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[var(--color-foreground)] truncate">
                         {listing.title}
@@ -194,16 +182,12 @@ export default function SellerListingsPage() {
                         </span>
                         {listing.auction?.currentPrice && (
                           <span className="text-xs font-medium text-[var(--color-foreground)]">
-                            {formatPriceEn(
-                              Number(listing.auction.currentPrice),
-                            )}
+                            {formatPriceEn(Number(listing.auction.currentPrice))}
                           </span>
                         )}
                       </div>
                     </div>
-
                     <div className="flex items-center gap-2 shrink-0">
-                      {/* ✅ Path fixed to match your structure: slistings/[id]/edit */}
                       <Link
                         href={`/slistings/${listing.id}/edit`}
                         className="p-2 rounded-lg border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-muted)] transition-colors"
