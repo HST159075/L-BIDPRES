@@ -8,8 +8,6 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 async function authedFetch(path: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
 
-  // Frontend "session" cookie-te token save kore (api.ts e Cookies.set("session", token))
-  // Backend "better-auth.session_token" cookie ba Bearer token accept kore
   const token =
     cookieStore.get("session")?.value ||
     cookieStore.get("better-auth.session_token")?.value ||
@@ -24,7 +22,6 @@ async function authedFetch(path: string, options: RequestInit = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      // Bearer token pathao — backend authenticate.ts eta accept kore
       Authorization: `Bearer ${token}`,
       ...options.headers,
     },
@@ -41,6 +38,25 @@ async function authedFetch(path: string, options: RequestInit = {}) {
   return { data: json };
 }
 
+// ── Seller application ─────────────────────────────────────────
+export async function applyForSellerAction(data: {
+  idCardUrl: string;
+  profilePhotoUrl: string;
+}) {
+  const result = await authedFetch("/seller/apply", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!result.error) revalidatePath("/seller/sapply");
+  return result;
+}
+
+export async function getApplicationStatusAction() {
+  return authedFetch("/seller/application-status");
+}
+
+// ── Listings (getMyListings & createListing এখন sellerService দিয়ে করুন) ──
+// এই দুটো শুধু fallback হিসেবে রাখা হয়েছে, সরাসরি use করবেন না
 export async function getMyListingsAction(page = 1, limit = 20) {
   return authedFetch(`/listings/seller/mine?page=${page}&limit=${limit}`);
 }
@@ -57,6 +73,7 @@ export async function createListingAction(data: Record<string, unknown>) {
   return result;
 }
 
+// ── Update & Delete (Server Action রাখা হয়েছে revalidatePath এর জন্য) ──
 export async function updateListingAction(
   id: string,
   data: Record<string, unknown>,
@@ -76,20 +93,4 @@ export async function deleteListingAction(id: string) {
     revalidatePath("/sdashboard");
   }
   return result;
-}
-
-export async function applyForSellerAction(data: {
-  idCardUrl: string;
-  profilePhotoUrl: string;
-}) {
-  const result = await authedFetch("/seller/apply", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-  if (!result.error) revalidatePath("/seller/sapply");
-  return result;
-}
-
-export async function getApplicationStatusAction() {
-  return authedFetch("/seller/application-status");
 }

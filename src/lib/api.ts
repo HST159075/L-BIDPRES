@@ -94,12 +94,13 @@ export const extractData = <T>(response: AxiosResponse): T =>
   response.data.data as T;
 
 export const extractPaginated = <T>(response: AxiosResponse) => {
-  // তোমার ব্যাকেন্ড sendPaginated ফাংশন সরাসরি response.data-তে data, total ইত্যাদি পাঠায়
+  const resData = response.data;
   return {
-    data: (response.data?.data || []) as T[],
-    total: response.data?.total || 0,
-    page: response.data?.page || 1,
-    limit: response.data?.limit || 20,
+    data: (resData?.data || []) as T[],
+    // Backend { pagination: { total } } অথবা পুরনো { total } দুটোই handle করে
+    total: resData?.pagination?.total ?? resData?.total ?? 0,
+    page: resData?.pagination?.page ?? resData?.page ?? 1,
+    limit: resData?.pagination?.limit ?? resData?.limit ?? 20,
   };
 };
 

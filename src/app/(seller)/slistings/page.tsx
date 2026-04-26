@@ -45,10 +45,10 @@ export default function SellerListingsPage() {
     const fetchListings = async () => {
       setLoading(true);
       try {
-        // ✅ Server Action বাদ — সরাসরি axios দিয়ে fetch
+        // ✅ axios — localStorage থেকে token নিজেই লাগায়
         const result = await sellerService.getMyListings(1, 50);
         setListings(Array.isArray(result.data) ? result.data : []);
-        setTotal(result.total ?? result.data?.length ?? 0);
+        setTotal(result.total ?? 0);
       } catch (e) {
         console.error("Failed to fetch listings:", e);
         setListings([]);
@@ -132,7 +132,9 @@ export default function SellerListingsPage() {
             ) : filteredListings.length === 0 ? (
               <div className="text-center py-16 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl">
                 <p className="font-medium text-[var(--color-muted-foreground)]">
-                  {search ? "No listings found matching your search" : "No listings yet"}
+                  {search
+                    ? "No listings found matching your search"
+                    : "No listings yet"}
                 </p>
                 {!search && (
                   <Link
@@ -182,7 +184,9 @@ export default function SellerListingsPage() {
                         </span>
                         {listing.auction?.currentPrice && (
                           <span className="text-xs font-medium text-[var(--color-foreground)]">
-                            {formatPriceEn(Number(listing.auction.currentPrice))}
+                            {formatPriceEn(
+                              Number(listing.auction.currentPrice),
+                            )}
                           </span>
                         )}
                       </div>

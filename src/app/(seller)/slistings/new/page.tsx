@@ -7,7 +7,7 @@ import { SmoothScroll } from "@/components/animations/SmoothScroll";
 import { ListingForm } from "@/components/seller/ListingForm";
 import type { ListingFormData } from "@/components/seller/ListingForm";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { createListingAction } from "@/actions/seller.actions";
+import { sellerService } from "@/services/seller.service";
 import { showSuccess, showError } from "@/lib/error-handler";
 import { ROUTES } from "@/config/constants";
 
@@ -17,7 +17,8 @@ export default function NewListingPage() {
 
   const handleSubmit = async (data: ListingFormData) => {
     try {
-      await createListingAction(data as Record<string, unknown>);
+      // ✅ Server Action বাদ — axios সরাসরি Bearer token পাঠায়
+      await sellerService.createListing(data as Record<string, unknown>);
       showSuccess("Listing created successfully!");
       router.push(ROUTES.sellerListings);
     } catch (err) {
