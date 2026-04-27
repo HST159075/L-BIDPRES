@@ -45,6 +45,10 @@ export const metadata: Metadata = {
     description: "Real-time product & real estate auctions in Bangladesh.",
   },
   robots: { index: true, follow: true },
+  // এখানে ভেরিফিকেশন কোডটি যোগ করা হয়েছে
+  verification: {
+    google: "9t0JKChu-BTdXM1SePUzrfq4BA8s6cLlysxeJOCPw8c",
+  },
 };
 
 export const viewport: Viewport = {
