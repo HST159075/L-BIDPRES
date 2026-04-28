@@ -4,20 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Users,
-  TrendingUp,
-  DollarSign,
-  AlertCircle,
-  CheckCircle,
-  Gavel,
-  ArrowRight,
+  Users, TrendingUp, DollarSign, AlertCircle, CheckCircle, Gavel, ArrowRight,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
-import {
-  ScrollReveal,
-  StaggerChildren,
-  StaggerItem,
-} from "@/components/animations/ScrollReveal";
+import { ScrollReveal, StaggerChildren, StaggerItem } from "@/components/animations/ScrollReveal";
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { getAnalyticsAction } from "@/actions/admin.actions";
@@ -25,29 +16,46 @@ import { formatPriceEn } from "@/lib/utils";
 import { ROUTES } from "@/config/constants";
 
 interface Analytics {
-  totalUsers?: number;
-  totalAuctions?: number;
-  totalRevenue?: number;
-  platformCommission?: number;
-  activeAuctions?: number;
-  pendingApplications?: number;
-  totalStrikes?: number;
-  bannedUsers?: number;
+  totalUsers: number;
+  totalSellers: number;
+  totalListings: number;
+  activeAuctions: number;
+  totalRevenue: number;
+  pendingApps: number;
+  totalStrikes: number;
+  bannedUsers: number;
+  wonAuctions: number;
+  completedPayments: number;
+}
+
+interface ActionCardProps {
+  href: string;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+interface StatItem {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  color: string;
+  bg: string;
 }
 
 export default function AdminDashboardPage() {
   const { user, isLoading: authLoading } = useRequireAuth("admin");
-  const [analytics, setAnalytics] = useState<Analytics>({});
+  const [analytics, setAnalytics] = useState<Partial<Analytics>>({});
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  getAnalyticsAction()
-    .then((res) => {
-      setAnalytics(res.data?.data || {});
-    })
-    .catch(() => {})
-    .finally(() => setLoading(false));
-}, []);
+  useEffect(() => {
+    if (!authLoading && user) {
+      getAnalyticsAction()
+        .then((res) => setAnalytics(res.data?.data || {}))
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    }
+  }, [authLoading, user]);
 
   if (authLoading) {
     return (
@@ -57,160 +65,93 @@ useEffect(() => {
     );
   }
 
-  const stats = [
-    {
-      label: "Total Users",
-      value: analytics.totalUsers || 0,
-      icon: Users,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
-    },
-    {
-      label: "Live Auctions",
-      value: analytics.activeAuctions || 0,
-      icon: TrendingUp,
-      color: "text-green-500",
-      bg: "bg-green-500/10",
-    },
-    {
-      label: "Platform Revenue",
-      value: formatPriceEn(analytics.platformCommission || 0),
-      icon: DollarSign,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-    },
-    {
-      label: "Pending Apps",
-      value: analytics.pendingApplications || 0,
-      icon: CheckCircle,
-      color: "text-purple-500",
-      bg: "bg-purple-500/10",
-    },
-    {
-      label: "Total Strikes",
-      value: analytics.totalStrikes || 0,
-      icon: AlertCircle,
-      color: "text-red-500",
-      bg: "bg-red-500/10",
-    },
-    {
-      label: "Banned Users",
-      value: analytics.bannedUsers || 0,
-      icon: Users,
-      color: "text-destructive",
-      bg: "bg-destructive/10",
-    },
-  ];
-
-  const quickActions = [
-    {
-      label: "Manage Users",
-      href: ROUTES.adminUsers,
-      icon: Users,
-      desc: "Strike, ban, or unban users",
-    },
-    {
-      label: "Review Applications",
-      href: ROUTES.adminApplications,
-      icon: CheckCircle,
-      desc: "Approve or reject seller applications",
-    },
-    {
-      label: "Browse Auctions",
-      href: ROUTES.auctions,
-      icon: Gavel,
-      desc: "View all live auctions",
-    },
+  const stats: StatItem[] = [
+    { label: "Total Users", value: analytics.totalUsers || 0, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Total Sellers", value: analytics.totalSellers || 0, icon: Users, color: "text-orange-500", bg: "bg-orange-500/10" },
+    { label: "Live Auctions", value: analytics.activeAuctions || 0, icon: TrendingUp, color: "text-green-500", bg: "bg-green-500/10" },
+    { label: "Total Listings", value: analytics.totalListings || 0, icon: Gavel, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+    { label: "Won Auctions", value: analytics.wonAuctions || 0, icon: CheckCircle, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { label: "Completed Payments", value: analytics.completedPayments || 0, icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Platform Revenue", value: formatPriceEn(Number(analytics.totalRevenue) || 0), icon: DollarSign, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { label: "Pending Apps", value: analytics.pendingApps || 0, icon: CheckCircle, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Total Strikes", value: analytics.totalStrikes || 0, icon: AlertCircle, color: "text-red-500", bg: "bg-red-500/10" },
+    { label: "Banned Users", value: analytics.bannedUsers || 0, icon: Users, color: "text-destructive", bg: "bg-destructive/10" },
   ];
 
   return (
     <SmoothScroll>
       <div className="min-h-screen bg-[var(--color-background)]">
         <Navbar />
-        <div className="pt-20 pb-16 max-w-6xl mx-auto px-4 sm:px-6">
-          <ScrollReveal className="mt-8 mb-10">
-            <p className="text-[var(--color-muted-foreground)] text-sm">
-              Admin Panel
-            </p>
-            <h1 className="text-3xl font-bold mt-1">Platform Analytics</h1>
+        <main className="pt-24 pb-16 max-w-6xl mx-auto px-4 sm:px-6">
+          <ScrollReveal className="mb-10">
+            <p className="text-[var(--color-muted-foreground)] text-sm font-medium uppercase tracking-wider">Admin Panel</p>
+            <h1 className="text-4xl font-bold mt-1 tracking-tight">Platform Analytics</h1>
           </ScrollReveal>
 
-          {/* Stats Grid */}
-          <StaggerChildren className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+          <StaggerChildren className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
             {stats.map((stat) => (
               <StaggerItem key={stat.label}>
-                <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-5 space-y-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}
-                  >
+                <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-5 hover:shadow-md transition-shadow">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${stat.bg} ${stat.color}`}>
                     <stat.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">
-                      {loading ? (
-                        <span className="animate-pulse bg-[var(--color-muted)] rounded w-12 h-6 inline-block" />
-                      ) : (
-                        stat.value
-                      )}
+                    <p className="text-2xl font-bold tabular-nums">
+                      {loading ? <span className="animate-pulse bg-[var(--color-muted)] rounded w-16 h-8 block" /> : stat.value}
                     </p>
-                    <p className="text-xs text-[var(--color-muted-foreground)]">
-                      {stat.label}
-                    </p>
+                    <p className="text-sm text-[var(--color-muted-foreground)] mt-1">{stat.label}</p>
                   </div>
                 </div>
               </StaggerItem>
             ))}
           </StaggerChildren>
 
-          {/* Quick Actions */}
           <ScrollReveal>
-            <h2 className="font-semibold text-lg mb-4">Quick Actions</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {quickActions.map((action) => (
-                <Link key={action.href} href={action.href}>
-                  <motion.div
-                    whileHover={{ y: -2 }}
-                    className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-5 hover:border-[var(--color-bid-500)]/40 transition-all group cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-[var(--color-bid-500)]/10 flex items-center justify-center">
-                        <action.icon className="w-5 h-5 text-[var(--color-bid-500)]" />
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-[var(--color-muted-foreground)] group-hover:text-[var(--color-bid-500)] group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="font-semibold text-sm">{action.label}</p>
-                    <p className="text-xs text-[var(--color-muted-foreground)] mt-1">
-                      {action.desc}
-                    </p>
-                  </motion.div>
-                </Link>
-              ))}
+            <h2 className="font-bold text-xl mb-6">Quick Actions</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <ActionCard href={ROUTES.adminUsers} icon={Users} title="Manage Users" description="Strike, ban, or unban users" />
+              <ActionCard href={ROUTES.adminApplications} icon={CheckCircle} title="Review Applications" description="Approve or reject seller applications" />
+              <ActionCard href={ROUTES.auctions} icon={Gavel} title="Browse Auctions" description="View all live auctions" />
             </div>
           </ScrollReveal>
 
-          {/* Pending applications alert */}
-          {(analytics.pendingApplications || 0) > 0 && (
-            <ScrollReveal className="mt-6">
-              <div className="flex items-center justify-between p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-amber-500" />
+          {/* ✅ pendingApps ব্যবহার করুন */}
+          {!loading && (analytics.pendingApps ?? 0) > 0 && (
+            <ScrollReveal className="mt-8">
+              <div className="flex items-center justify-between p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+                <div className="flex items-center gap-4">
+                  <div className="bg-amber-500 p-2 rounded-full">
+                    <AlertCircle className="w-5 h-5 text-white" />
+                  </div>
                   <p className="text-sm font-medium">
-                    {analytics.pendingApplications} seller application
-                    {(analytics.pendingApplications || 0) > 1 ? "s" : ""}{" "}
-                    waiting for review
+                    {analytics.pendingApps} seller application{(analytics.pendingApps ?? 0) > 1 ? "s" : ""} waiting for review
                   </p>
                 </div>
-                <Link
-                  href={ROUTES.adminApplications}
-                  className="px-3 py-1.5 text-xs bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
-                >
+                <Link href={ROUTES.adminApplications} className="px-5 py-2 bg-amber-500 text-white text-sm font-bold rounded-xl hover:bg-amber-600 transition-all">
                   Review Now
                 </Link>
               </div>
             </ScrollReveal>
           )}
-        </div>
+        </main>
       </div>
     </SmoothScroll>
+  );
+}
+
+function ActionCard({ href, icon: Icon, title, description }: ActionCardProps) {
+  return (
+    <Link href={href}>
+      <motion.div whileHover={{ y: -4 }} className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 hover:border-[var(--color-bid-500)]/50 transition-all group shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="w-12 h-12 rounded-2xl bg-[var(--color-bid-500)]/10 flex items-center justify-center group-hover:bg-[var(--color-bid-500)]/20 transition-colors">
+            <Icon className="w-6 h-6 text-[var(--color-bid-500)]" />
+          </div>
+          <ArrowRight className="w-5 h-5 text-[var(--color-muted-foreground)] group-hover:text-[var(--color-bid-500)] group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-bold text-base mb-1">{title}</h3>
+        <p className="text-xs text-[var(--color-muted-foreground)] leading-relaxed">{description}</p>
+      </motion.div>
+    </Link>
   );
 }
