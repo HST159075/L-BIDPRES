@@ -14,26 +14,16 @@ import { useAuthStore } from "@/store/authStore";
 import { showError, showSuccess } from "@/lib/error-handler";
 import { ROUTES } from "@/config/constants";
 
-const bdPhone = z
-  .string()
-  .regex(/^(?:\+88|88)?01[3-9]\d{8}$/, "Invalid BD phone number");
-
-const registerSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(50),
-    email: z.string().email("Invalid email").optional().or(z.literal("")),
-    phone: bdPhone.optional().or(z.literal("")),
-    password: z
-      .string()
-      .min(8)
-      .regex(/[A-Z]/, "Must contain uppercase")
-      .regex(/[0-9]/, "Must contain number"),
-    identifier: z.enum(["email", "phone"]),
-  })
-  .refine((d) => (d.identifier === "email" ? !!d.email : !!d.phone), {
-    message: "Please provide your email or phone",
-    path: ["email"],
-  });
+// ✅ শুধু email — phone বাদ
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(50),
+  email: z.string().email("Invalid email"),
+  password: z
+    .string()
+    .min(8)
+    .regex(/[A-Z]/, "Must contain uppercase")
+    .regex(/[0-9]/, "Must contain number"),
+});
 
 type RegisterForm = z.infer<typeof registerSchema>;
 type Step = "form" | "otp" | "done";
@@ -49,28 +39,17 @@ export default function RegisterPage() {
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { identifier: "email" },
   });
-
-  const identifierType = form.watch("identifier");
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
     try {
-      const payload = {
+      await authService.register({
         name: data.name,
-        email: data.identifier === "email" ? data.email : undefined,
-        phone: data.identifier === "phone" ? data.phone : undefined,
+        email: data.email,
         password: data.password,
-      };
-      await authService.register(payload);
-
-      const otpPayload =
-        data.identifier === "email"
-          ? { email: data.email, type: "email" as const }
-          : { phone: data.phone, type: "phone" as const };
-      await authService.sendOTP(otpPayload);
-
+      });
+      await authService.sendOTP({ email: data.email, type: "email" });
       showSuccess("OTP sent! Please verify.");
       setStep("otp");
     } catch (err) {
@@ -86,11 +65,11 @@ export default function RegisterPage() {
     setIsLoading(true);
     const data = form.getValues();
     try {
-      const verifyPayload =
-        data.identifier === "email"
-          ? { email: data.email, code: otp, type: "email" as const }
-          : { phone: data.phone, code: otp, type: "phone" as const };
-      await authService.verifyOTP(verifyPayload);
+      await authService.verifyOTP({
+        email: data.email,
+        code: otp,
+        type: "email",
+      });
       const user = await authService.getMe();
       setUser(user);
       setStep("done");
@@ -104,12 +83,8 @@ export default function RegisterPage() {
 
   const handleResendOTP = async () => {
     const data = form.getValues();
-    const payload =
-      data.identifier === "email"
-        ? { email: data.email, type: "email" as const }
-        : { phone: data.phone, type: "phone" as const };
     try {
-      await authService.sendOTP(payload);
+      await authService.sendOTP({ email: data.email, type: "email" });
       showSuccess("OTP resent!");
     } catch (err) {
       showError(err);
@@ -123,7 +98,6 @@ export default function RegisterPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md space-y-8"
       >
-        {/* Logo */}
         <Link href={ROUTES.home} className="flex items-center gap-2">
           <div className="w-9 h-9 bg-bid-500 rounded-xl flex items-center justify-center">
             <Gavel className="w-5 h-5 text-white" />
@@ -149,10 +123,7 @@ export default function RegisterPage() {
                 </p>
               </div>
 
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Name */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Full Name</label>
@@ -168,51 +139,21 @@ export default function RegisterPage() {
                   )}
                 </div>
 
-                {/* Identifier type */}
-                <div className="flex gap-2 bg-muted p-1 rounded-xl">
-                  {(["email", "phone"] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => form.setValue("identifier", t)}
-                      className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${identifierType === t ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"}`}
-                    >
-                      {t === "email" ? "Email" : "Phone"}
-                    </button>
-                  ))}
+                {/* Email */}
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Email</label>
+                  <input
+                    {...form.register("email")}
+                    type="email"
+                    placeholder="email@example.com"
+                    className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bid-500 transition-all"
+                  />
+                  {form.formState.errors.email && (
+                    <p className="text-xs text-destructive">
+                      {form.formState.errors.email.message}
+                    </p>
+                  )}
                 </div>
-
-                {identifierType === "email" ? (
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Email</label>
-                    <input
-                      {...form.register("email")}
-                      type="email"
-                      placeholder="email@example.com"
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bid-500 transition-all"
-                    />
-                    {form.formState.errors.email && (
-                      <p className="text-xs text-destructive">
-                        {form.formState.errors.email.message}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Phone Number</label>
-                    <input
-                      {...form.register("phone")}
-                      type="tel"
-                      placeholder="01XXXXXXXXX"
-                      className="w-full px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bid-500 transition-all"
-                    />
-                    {form.formState.errors.phone && (
-                      <p className="text-xs text-destructive">
-                        {form.formState.errors.phone.message}
-                      </p>
-                    )}
-                  </div>
-                )}
 
                 {/* Password */}
                 <div className="space-y-1.5">
@@ -229,11 +170,7 @@ export default function RegisterPage() {
                       onClick={() => setShowPass(!showPass)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     >
-                      {showPass ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
+                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {form.formState.errors.password && (
@@ -254,10 +191,7 @@ export default function RegisterPage() {
 
                 <p className="text-center text-sm text-muted-foreground">
                   Already have an account?{" "}
-                  <Link
-                    href={ROUTES.login}
-                    className="text-bid-500 font-medium hover:underline"
-                  >
+                  <Link href={ROUTES.login} className="text-bid-500 font-medium hover:underline">
                     Login
                   </Link>
                 </p>
@@ -276,10 +210,7 @@ export default function RegisterPage() {
               <div>
                 <h1 className="text-3xl font-bold">Verify OTP</h1>
                 <p className="text-muted-foreground mt-1">
-                  Enter the code sent to{" "}
-                  <strong>
-                    {form.watch(identifierType as "email" | "phone")}
-                  </strong>
+                  Enter the code sent to <strong>{form.watch("email")}</strong>
                 </p>
               </div>
               <OTPInput value={otp} onChange={setOtp} error={otpError} />
