@@ -1,22 +1,13 @@
 import Link from "next/link";
-import { Gavel } from "lucide-react";
+import { Gavel, ArrowUpRight } from "lucide-react";
 import { ROUTES } from "@/config/constants";
 
-// লিংকের জন্য ইন্টারফেস
-interface FooterLink {
-  label: string;
-  href: string;
-}
-
-interface FooterSection {
-  title: string;
-  links: FooterLink[];
-}
+interface FooterLink { label: string; href: string; }
+interface FooterSection { title: string; links: FooterLink[]; }
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
-  // লিংকের ডাটাগুলো আলাদা করে নেওয়া যাতে কোড হিজিবিজি না হয়
   const sections: FooterSection[] = [
     {
       title: "Platform",
@@ -37,7 +28,7 @@ export function Footer() {
     {
       title: "Legal",
       links: [
-        { label: "Terms of Service", href: "#" }, // আপাতত হ্যাশ দেওয়া
+        { label: "Terms of Service", href: "#" },
         { label: "Privacy Policy", href: "#" },
         { label: "Contact Us", href: "#" },
       ],
@@ -45,39 +36,52 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-border bg-background mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          
-          {/* Brand Section */}
-          <div className="col-span-2 md:col-span-1 space-y-4">
-            <Link href={ROUTES.home} className="flex items-center gap-2 group w-fit">
-              <div className="w-9 h-9 bg-bid-500 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform">
+    <footer className="relative mt-auto overflow-hidden border-t border-[var(--color-border)] bg-[var(--color-background)]">
+      {/* Background glow */}
+      <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[var(--color-bid-500)]/5 blur-3xl" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1 space-y-5">
+            <Link href={ROUTES.home} className="group flex items-center gap-2.5 w-fit">
+              <div className="relative w-10 h-10 bg-[var(--color-bid-500)] rounded-xl flex items-center justify-center shadow-lg shadow-[var(--color-bid-500)]/30 group-hover:shadow-[var(--color-bid-500)]/50 transition-shadow">
                 <Gavel className="w-5 h-5 text-white" />
+                <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <span className="font-bold text-xl tracking-tight">
-                Bid<span className="text-bid-500">BD</span>
+              <span className="font-black text-xl tracking-tight">
+                Bid<span className="text-[var(--color-bid-500)]">BD</span>
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px]">
-              বাংলাদেশের প্রথম রিয়েল-টাইম অনলাইন অকশন প্ল্যাটফর্ম পণ্য এবং রিয়েল এস্টেটের জন্য।
+            <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+              বাংলাদেশের প্রথম রিয়েল-টাইম অনলাইন অকশন প্ল্যাটফর্ম।
             </p>
+            {/* Live indicator */}
+            <div className="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              </span>
+              Live auctions running
+            </div>
           </div>
 
-          {/* Dynamic Sections */}
+          {/* Links */}
           {sections.map((section) => (
             <div key={section.title} className="space-y-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-foreground">
+              <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-foreground)]">
                 {section.title}
               </h4>
-              <nav className="flex flex-col space-y-2">
+              <nav className="flex flex-col space-y-2.5">
                 {section.links.map((link) => (
                   <Link
                     key={link.label}
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-bid-500 transition-colors w-fit"
+                    className="group flex items-center gap-1 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-bid-500)] transition-colors w-fit"
                   >
                     {link.label}
+                    <ArrowUpRight className="w-3 h-3 opacity-0 -translate-y-0.5 translate-x-0.5 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all" />
                   </Link>
                 ))}
               </nav>
@@ -85,15 +89,14 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4">
-            <p>© {currentYear} BidBD. All rights reserved.</p>
-            <span className="hidden sm:inline text-border">|</span>
-            <p>Built for the future of auctions.</p>
-          </div>
-          <p className="flex items-center gap-1">
-            Made with <span className="text-red-500">❤️</span> in Bangladesh
+        {/* Divider with gradient */}
+        <div className="mt-12 h-px bg-gradient-to-r from-transparent via-[var(--color-border)] to-transparent" />
+
+        {/* Bottom */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-muted-foreground)]">
+          <p>© {currentYear} BidBD. All rights reserved.</p>
+          <p className="flex items-center gap-1.5">
+            Made with <span className="text-red-500 animate-pulse">❤</span> in Bangladesh
           </p>
         </div>
       </div>
