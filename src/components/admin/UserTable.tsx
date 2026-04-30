@@ -1,30 +1,40 @@
 "use client";
 
-import { useState }              from "react";
-import { motion }                from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { AlertTriangle, Shield, Trash2 } from "lucide-react";
-import { ConfirmDialog }         from "@/components/common/ConfirmDialog";
-import { formatTimeAgo }         from "@/lib/utils";
-import type { User }             from "@/types";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { formatTimeAgo } from "@/lib/utils";
+import type { User } from "@/types";
 
 interface UserTableProps {
-  users:         User[];
-  isLoading?:    boolean;
-  onAddStrike:   (userId: string) => Promise<void>;
-  onBan:         (userId: string) => Promise<void>;
-  onUnban:       (userId: string) => Promise<void>;
+  users: User[];
+  isLoading?: boolean;
+  onAddStrike: (userId: string) => Promise<void>;
+  onBan: (userId: string) => Promise<void>;
+  onUnban: (userId: string) => Promise<void>;
 }
 
-export function UserTable({ users, isLoading, onAddStrike, onBan, onUnban }: UserTableProps) {
+export function UserTable({
+  users,
+  isLoading,
+  onAddStrike,
+  onBan,
+  onUnban,
+}: UserTableProps) {
   const [confirm, setConfirm] = useState<{
-    open:    boolean;
+    open: boolean;
     action?: "strike" | "ban" | "unban";
     userId?: string;
-    name?:   string;
+    name?: string;
   }>({ open: false });
   const [actionLoading, setActionLoading] = useState(false);
 
-  const openConfirm = (action: "strike" | "ban" | "unban", userId: string, name: string) => {
+  const openConfirm = (
+    action: "strike" | "ban" | "unban",
+    userId: string,
+    name: string,
+  ) => {
     setConfirm({ open: true, action, userId, name });
   };
 
@@ -33,8 +43,8 @@ export function UserTable({ users, isLoading, onAddStrike, onBan, onUnban }: Use
     setActionLoading(true);
     try {
       if (confirm.action === "strike") await onAddStrike(confirm.userId);
-      if (confirm.action === "ban")    await onBan(confirm.userId);
-      if (confirm.action === "unban")  await onUnban(confirm.userId);
+      if (confirm.action === "ban") await onBan(confirm.userId);
+      if (confirm.action === "unban") await onUnban(confirm.userId);
     } finally {
       setActionLoading(false);
       setConfirm({ open: false });
@@ -44,7 +54,7 @@ export function UserTable({ users, isLoading, onAddStrike, onBan, onUnban }: Use
   if (isLoading) {
     return (
       <div className="space-y-2">
-        {[1,2,3,4,5].map((i) => (
+        {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />
         ))}
       </div>
@@ -65,13 +75,27 @@ export function UserTable({ users, isLoading, onAddStrike, onBan, onUnban }: Use
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr className="border-b border-border">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">User</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Role</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Purchases</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Strikes</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Joined</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Actions</th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                User
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                Role
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                Purchases
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                Strikes
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                Status
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                Joined
+              </th>
+              <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-card divide-y divide-border">
@@ -90,26 +114,38 @@ export function UserTable({ users, isLoading, onAddStrike, onBan, onUnban }: Use
                     </div>
                     <div>
                       <p className="font-medium">{u.name}</p>
-                      <p className="text-xs text-muted-foreground">{u.email || u.phone}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {u.email || u.phone}
+                      </p>
                     </div>
                   </div>
                 </td>
                 <td className="px-5 py-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
-                    u.role === "admin"  ? "bg-purple-500/10 text-purple-600" :
-                    u.role === "seller" ? "bg-blue-500/10 text-blue-600"     :
-                                         "bg-muted text-muted-foreground"
-                  }`}>
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${
+                      u.role === "admin"
+                        ? "bg-purple-500/10 text-purple-600"
+                        : u.role === "seller"
+                          ? "bg-blue-500/10 text-blue-600"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
                     {u.role}
                   </span>
                 </td>
                 <td className="px-5 py-3 font-medium">{u.purchaseCount}</td>
                 <td className="px-5 py-3">
-                  <span className={`font-bold ${
-                    u.strikeCount === 0 ? "text-green-600" :
-                    u.strikeCount === 1 ? "text-yellow-600" :
-                    u.strikeCount === 2 ? "text-orange-600" : "text-red-600"
-                  }`}>
+                  <span
+                    className={`font-bold ${
+                      u.strikeCount === 0
+                        ? "text-green-600"
+                        : u.strikeCount === 1
+                          ? "text-yellow-600"
+                          : u.strikeCount === 2
+                            ? "text-orange-600"
+                            : "text-red-600"
+                    }`}
+                  >
                     {u.strikeCount}/3
                   </span>
                 </td>
@@ -168,20 +204,26 @@ export function UserTable({ users, isLoading, onAddStrike, onBan, onUnban }: Use
       <ConfirmDialog
         open={confirm.open}
         title={
-          confirm.action === "strike" ? "Add Strike"    :
-          confirm.action === "ban"    ? "Ban User"      : "Unban User"
+          confirm.action === "strike"
+            ? "Add Strike"
+            : confirm.action === "ban"
+              ? "Ban User"
+              : "Unban User"
         }
         description={
           confirm.action === "strike"
             ? `Add a strike to ${confirm.name}? At 3 strikes they will be auto-banned.`
             : confirm.action === "ban"
-            ? `Permanently ban ${confirm.name}? They won't be able to use the platform.`
-            : `Unban ${confirm.name}? They will regain access to the platform.`
+              ? `Permanently ban ${confirm.name}? They won't be able to use the platform.`
+              : `Unban ${confirm.name}? They will regain access to the platform.`
         }
         variant={confirm.action === "unban" ? "default" : "danger"}
         confirmText={
-          confirm.action === "strike" ? "Add Strike" :
-          confirm.action === "ban"    ? "Ban User"   : "Unban User"
+          confirm.action === "strike"
+            ? "Add Strike"
+            : confirm.action === "ban"
+              ? "Ban User"
+              : "Unban User"
         }
         onConfirm={handleConfirm}
         onCancel={() => setConfirm({ open: false })}

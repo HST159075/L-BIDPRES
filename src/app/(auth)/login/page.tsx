@@ -50,12 +50,15 @@ export default function LoginPage() {
 
     // Step 2: Save token FIRST
     const roleFromData = data?.role;
+    setAuthToken(token, roleFromData);
 
     // Step 4: Get user info
     const user = await authService.getMe();
     
-    // Save token and role to cookies for middleware
-    setAuthToken(token, user.role || roleFromData);
+    // Update role if user data has a more accurate one
+    if (user.role && user.role !== roleFromData) {
+      setAuthToken(token, user.role);
+    }
 
     setUser(user);
     setInitialized(true);
