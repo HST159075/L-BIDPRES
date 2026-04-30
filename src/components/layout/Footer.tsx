@@ -134,18 +134,18 @@ export function Footer() {
             {/* Contact info */}
             <div className="space-y-2.5">
               <a
-                href="mailto:support@bidbd.com"
+                href="mailto:hsttasin90@gmail.com"
                 className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-bid-500)] transition-colors"
               >
                 <Mail className="w-4 h-4 shrink-0" />
-                support@bidbd.com
+                hsttasin90@gmail.com
               </a>
               <a
-                href="tel:+8801700000000"
+                href="tel:+8801887238025"
                 className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-bid-500)] transition-colors"
               >
                 <Phone className="w-4 h-4 shrink-0" />
-                +880 1700-000000
+                +880 1887-238025
               </a>
               <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
                 <MapPin className="w-4 h-4 shrink-0" />

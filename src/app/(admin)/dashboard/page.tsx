@@ -28,6 +28,8 @@ interface Analytics {
   bannedUsers: number;
   wonAuctions: number;
   completedPayments: number;
+  revenueChart: { name: string; value: number }[];
+  userGrowthChart: { name: string; value: number }[];
 }
 
 interface ActionCardProps {
@@ -113,29 +115,14 @@ export default function AdminDashboardPage() {
               <AnalyticsCharts 
                 title="Revenue Overview" 
                 type="area" 
-                data={[
-                  { name: "Jan", value: 4000 },
-                  { name: "Feb", value: 3000 },
-                  { name: "Mar", value: 5000 },
-                  { name: "Apr", value: 4500 },
-                  { name: "May", value: 6000 },
-                  { name: "Jun", value: 5500 },
-                ]} 
+                data={analytics.revenueChart || []} 
               />
             </ScrollReveal>
             <ScrollReveal delay={0.2}>
               <AnalyticsCharts 
                 title="User Growth" 
                 type="bar" 
-                data={[
-                  { name: "Mon", value: 120 },
-                  { name: "Tue", value: 150 },
-                  { name: "Wed", value: 180 },
-                  { name: "Thu", value: 220 },
-                  { name: "Fri", value: 190 },
-                  { name: "Sat", value: 250 },
-                  { name: "Sun", value: 310 },
-                ]} 
+                data={analytics.userGrowthChart || []} 
               />
             </ScrollReveal>
           </div>

@@ -42,22 +42,22 @@ export default function ContactPage() {
               <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 space-y-6">
                 <h2 className="font-bold text-lg">Contact Information</h2>
                 <div className="space-y-4">
-                  <a href="mailto:support@bidbd.com" className="flex items-start gap-4 group">
+                  <a href="mailto:hsttasin90@gmail.com" className="flex items-start gap-4 group">
                     <div className="w-10 h-10 rounded-xl bg-[var(--color-bid-500)]/10 flex items-center justify-center shrink-0">
                       <Mail className="w-5 h-5 text-[var(--color-bid-500)]" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold group-hover:text-[var(--color-bid-500)] transition-colors">Email</p>
-                      <p className="text-sm text-[var(--color-muted-foreground)]">support@bidbd.com</p>
+                      <p className="text-sm text-[var(--color-muted-foreground)]">hsttasin90@gmail.com</p>
                     </div>
                   </a>
-                  <a href="tel:+8801700000000" className="flex items-start gap-4 group">
+                  <a href="tel:+8801887238025" className="flex items-start gap-4 group">
                     <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
                       <Phone className="w-5 h-5 text-green-500" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold group-hover:text-green-500 transition-colors">Phone</p>
-                      <p className="text-sm text-[var(--color-muted-foreground)]">+880 1700-000000</p>
+                      <p className="text-sm text-[var(--color-muted-foreground)]">+880 1887-238025</p>
                     </div>
                   </a>
                   <div className="flex items-start gap-4">

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Gavel, ShoppingBag, TrendingUp, Bell, ArrowRight, Clock } from "lucide-react";
+import { Gavel, ShoppingBag, TrendingUp, Bell, ArrowRight, Clock, DollarSign, CheckCircle } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { ScrollReveal, StaggerChildren, StaggerItem } from "@/components/animations/ScrollReveal";
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
@@ -184,36 +184,43 @@ export default function BuyerDashboardPage() {
                         <p className="text-xs capitalize text-muted-foreground">{bid.status}</p>
                         {bid.status === "won" && (
                           <div className="mt-1 flex gap-1 flex-wrap justify-end">
-                            {(!bid.payment || bid.payment.status === "pending") && (
-                              <>
-                                <button
-                                  onClick={() => handlePayment(bid.id, "sslcommerz")}
-                                  disabled={payingBidId === bid.id}
-                                  className="px-2 py-1 bg-bid-500 hover:bg-bid-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
-                                >
-                                  {payingBidId === bid.id ? "..." : "SSLCommerz"}
-                                </button>
-                                <button
-                                  onClick={() => handlePayment(bid.id, "bkash")}
-                                  disabled={payingBidId === bid.id}
-                                  className="px-2 py-1 bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
-                                >
-                                  {payingBidId === bid.id ? "..." : "bKash"}
-                                </button>
-                              </>
-                            )}
-                            {bid.payment?.status === "held" && bid.auction?.id && (
-                              <button
-                                onClick={() => handleConfirmDelivery(bid.auction!.id!)}
-                                disabled={confirmingAuctionId === bid.auction.id}
-                                className="px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
-                              >
-                                {confirmingAuctionId === bid.auction.id ? "..." : "Confirm Delivery"}
-                              </button>
-                            )}
-                            {bid.payment?.status === "released" && (
-                              <span className="px-2 py-1 bg-green-500/10 text-green-600 text-xs font-semibold rounded-lg">✓ Completed</span>
-                            )}
+                             {(!bid.payment || bid.payment.status === "pending") && (
+                               <div className="flex flex-col gap-1.5 w-full sm:w-auto">
+                                 <button
+                                   onClick={() => handlePayment(bid.id, "sslcommerz")}
+                                   disabled={payingBidId === bid.id}
+                                   className="flex items-center justify-center gap-2 px-3 py-1.5 bg-[var(--color-bid-500)] hover:bg-[var(--color-bid-600)] text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 shadow-sm"
+                                 >
+                                   <DollarSign className="w-3 h-3" />
+                                   {payingBidId === bid.id ? "Processing..." : "Pay with SSLCommerz"}
+                                 </button>
+                                 <button
+                                   onClick={() => handlePayment(bid.id, "bkash")}
+                                   disabled={payingBidId === bid.id}
+                                   className="flex items-center justify-center gap-2 px-3 py-1.5 bg-[#e2136e] hover:bg-[#c1105d] text-white text-[10px] font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 shadow-sm"
+                                 >
+                                   <div className="w-3 h-3 bg-white rounded-full flex items-center justify-center">
+                                      <span className="text-[#e2136e] text-[8px] font-black">b</span>
+                                   </div>
+                                   {payingBidId === bid.id ? "Processing..." : "Pay with bKash"}
+                                 </button>
+                               </div>
+                             )}
+                             {bid.payment?.status === "held" && bid.auction?.id && (
+                               <button
+                                 onClick={() => handleConfirmDelivery(bid.auction!.id!)}
+                                 disabled={confirmingAuctionId === bid.auction.id}
+                                 className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 shadow-md shadow-green-500/20"
+                               >
+                                 <CheckCircle className="w-3.5 h-3.5" />
+                                 {confirmingAuctionId === bid.auction.id ? "Confirming..." : "Confirm Product Received"}
+                               </button>
+                             )}
+                             {bid.payment?.status === "released" && (
+                               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 text-[10px] font-bold rounded-lg border border-green-500/20">
+                                 <CheckCircle className="w-3.5 h-3.5" /> Transaction Completed
+                               </div>
+                             )}
                           </div>
                         )}
                       </div>
