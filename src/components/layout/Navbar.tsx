@@ -18,6 +18,7 @@ import { authService } from "@/services/auth.service";
 import { showError } from "@/lib/error-handler";
 import { ROUTES } from "@/config/constants";
 import { cn } from "@/lib/utils";
+import { setAuthToken } from "@/lib/api";
 
 export function Navbar() {
   const t = useTranslations("nav");
@@ -48,7 +49,8 @@ export function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      await authService.logout().catch(() => {});
+      setAuthToken(null);
       logout();
       window.location.href = ROUTES.login;
     } catch (err) {
