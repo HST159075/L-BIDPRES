@@ -29,6 +29,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // 2. Token thakle user profile fetch kora
         const user = await authService.getMe();
+        
+        // Middleware-er jonno cookie sync kora
+        const { setAuthToken } = await import("@/lib/api");
+        setAuthToken(token, user.role);
+
         setUser(user);
       } catch (error) {
         // 3. Token invalid hole shob clear kora

@@ -46,13 +46,14 @@ export default function LoginPage() {
     if (!token) throw new Error("No token received from server");
 
     // Step 2: Save token FIRST
-    setAuthToken(token);
-
-    // Step 3: Small delay to ensure token is saved
-    await new Promise((r) => setTimeout(r, 100));
+    const roleFromData = data?.role;
 
     // Step 4: Get user info
     const user = await authService.getMe();
+    
+    // Save token and role to cookies for middleware
+    setAuthToken(token, user.role || roleFromData);
+
     setUser(user);
     setInitialized(true);
 

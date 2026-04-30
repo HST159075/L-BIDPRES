@@ -15,8 +15,8 @@ const ADMIN_MENU = [
   { href: ROUTES.adminDashboard, icon: LayoutDashboard, label: "Overview" },
   { href: ROUTES.adminUsers, icon: Users, label: "Users" },
   { href: ROUTES.adminApplications, icon: CheckCircle, label: "Applications" },
+  { href: ROUTES.sellerDashboard, icon: BarChart3, label: "Seller Panel" },
   { href: ROUTES.auctions, icon: Gavel, label: "Auctions" },
-  { href: ROUTES.adminDashboard, icon: BarChart3, label: "Reports" },
 ];
 
 interface AdminSidebarProps {

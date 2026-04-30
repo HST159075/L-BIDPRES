@@ -21,17 +21,23 @@ function getStorage(): Storage | null {
     return null;
   }
 }
-export function setAuthToken(token: string | null) {
+export function setAuthToken(token: string | null, role?: string | null) {
   const storage = getStorage();
   if (token) {
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     storage?.setItem(TOKEN_KEY, token);
     // Middleware-er jonno cookie-te save korun (7 days expiry)
     Cookies.set("session", token, { expires: 7, path: '/' }); 
+    if (role) {
+      Cookies.set("user-role", role, { expires: 7, path: '/' });
+      storage?.setItem("bid_user_role", role);
+    }
   } else {
     delete api.defaults.headers.common["Authorization"];
     storage?.removeItem(TOKEN_KEY);
+    storage?.removeItem("bid_user_role");
     Cookies.remove("session");
+    Cookies.remove("user-role");
   }
 }
 
