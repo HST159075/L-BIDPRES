@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import {
   Gavel, Menu, X, Sun, Moon,
   User, LayoutDashboard, LogOut, ChevronDown,
+  Heart, HelpCircle, FileText, Info,
+  ShoppingBag, Settings,
 } from "lucide-react";
 import { NotificationBell } from "@/components/common/NotificationBell";
 import { useAuthStore } from "@/store/authStore";
@@ -23,13 +25,25 @@ export function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useAuthStore();
+  const exploreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (exploreRef.current && !exploreRef.current.contains(e.target as Node)) {
+        setExploreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
@@ -42,10 +56,30 @@ export function Navbar() {
     }
   };
 
-  const navLinks = [
+  // Logged-out nav: 4+ routes
+  const publicNavLinks = [
     { href: ROUTES.home, label: t("home") },
     { href: ROUTES.auctions, label: t("auctions") },
+    { href: ROUTES.about, label: "About" },
+    { href: ROUTES.contact, label: "Contact" },
   ];
+
+  // Explore dropdown items
+  const exploreItems = [
+    { href: ROUTES.blog, label: "Blog", icon: FileText, desc: "Tips & guides" },
+    { href: ROUTES.help, label: "Help Center", icon: HelpCircle, desc: "FAQs & support" },
+    { href: ROUTES.about, label: "About Us", icon: Info, desc: "Our story" },
+  ];
+
+  // Logged-in nav: 6+ routes (Home, Auctions, Dashboard, My Bids, Explore dropdown, + user menu items)
+  const loggedInNavLinks = [
+    { href: ROUTES.home, label: t("home") },
+    { href: ROUTES.auctions, label: t("auctions") },
+    { href: ROUTES.buyerDashboard, label: "Dashboard" },
+    { href: ROUTES.buyerBids, label: "My Bids" },
+  ];
+
+  const navLinks = user ? loggedInNavLinks : publicNavLinks;
 
   return (
     <motion.header
@@ -107,6 +141,53 @@ export function Navbar() {
                 <span className="relative z-10">{link.label}</span>
               </Link>
             ))}
+
+            {/* Explore dropdown */}
+            <div ref={exploreRef} className="relative">
+              <button
+                onClick={() => setExploreOpen(!exploreOpen)}
+                className={cn(
+                  "flex items-center gap-1 px-4 py-1.5 rounded-lg text-sm font-medium transition-all",
+                  "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"
+                )}
+              >
+                Explore
+                <motion.div animate={{ rotate: exploreOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </motion.div>
+              </button>
+
+              <AnimatePresence>
+                {exploreOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-64 bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden z-30"
+                  >
+                    <div className="p-2 space-y-0.5">
+                      {exploreItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setExploreOpen(false)}
+                          className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-accent)] transition-colors group"
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-[var(--color-bid-500)]/10 flex items-center justify-center group-hover:bg-[var(--color-bid-500)]/20 transition-colors">
+                            <item.icon className="w-4 h-4 text-[var(--color-bid-500)]" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{item.label}</p>
+                            <p className="text-xs text-[var(--color-muted-foreground)]">{item.desc}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
 
           {/* Right actions */}
@@ -197,12 +278,14 @@ export function Navbar() {
                             {[
                               { href: ROUTES.buyerDashboard, icon: LayoutDashboard, label: "Dashboard" },
                               { href: ROUTES.buyerProfile, icon: User, label: "Profile" },
+                              { href: ROUTES.buyerBids, icon: ShoppingBag, label: "My Bids" },
                               ...(user.role === "seller" || user.role === "admin"
                                 ? [{ href: ROUTES.sellerDashboard, icon: Gavel, label: "Seller Panel" }]
                                 : []),
                               ...(user.role === "admin"
-                                ? [{ href: ROUTES.adminDashboard, icon: LayoutDashboard, label: "Admin Panel" }]
+                                ? [{ href: ROUTES.adminDashboard, icon: Settings, label: "Admin Panel" }]
                                 : []),
+                              { href: ROUTES.help, icon: HelpCircle, label: "Help Center" },
                             ].map((item) => (
                               <Link
                                 key={item.href}
@@ -293,6 +376,23 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Explore links in mobile */}
+              <div className="pt-2 border-t border-[var(--color-border)] mt-2">
+                <p className="px-4 py-2 text-xs font-semibold text-[var(--color-muted-foreground)] uppercase tracking-wider">Explore</p>
+                {exploreItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium hover:bg-[var(--color-accent)] transition-colors"
+                  >
+                    <item.icon className="w-4 h-4 text-[var(--color-muted-foreground)]" />
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+
               {!user && (
                 <div className="pt-3 space-y-2 border-t border-[var(--color-border)]">
                   <Link

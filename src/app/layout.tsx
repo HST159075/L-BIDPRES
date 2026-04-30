@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "react-hot-toast";
+import { AIChatbot } from "@/components/ai/AIChatbot";
 import { QueryProvider } from "@/components/common/QueryProvider";
 import { AuthProvider } from "@/components/common/AuthProvider";
 import "./globals.css";
@@ -81,8 +82,9 @@ export default async function RootLayout({
             <QueryProvider>
               <AuthProvider>
                 {children}
+                <AIChatbot />
                 <Toaster
-                  position="top-right"
+                  position="bottom-right"
                   toastOptions={{
                     duration: 4000,
                     style: {

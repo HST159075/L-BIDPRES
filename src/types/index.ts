@@ -175,6 +175,8 @@ export interface AuctionFilter {
   maxPrice?:  number;
   search?:    string;
   location?:  string;
+  sortBy?:    string;
+  sortOrder?: "asc" | "desc";
   page?:      number;
   limit?:     number;
 }

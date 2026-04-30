@@ -14,6 +14,8 @@ import { useRequireAuth } from "@/hooks/useAuth";
 import { getAnalyticsAction } from "@/actions/admin.actions";
 import { formatPriceEn } from "@/lib/utils";
 import { ROUTES } from "@/config/constants";
+import { AnalyticsCharts } from "@/components/dashboard/AnalyticsCharts";
+
 
 interface Analytics {
   totalUsers: number;
@@ -106,7 +108,40 @@ export default function AdminDashboardPage() {
             ))}
           </StaggerChildren>
 
+          <div className="grid lg:grid-cols-2 gap-8 mb-12">
+            <ScrollReveal delay={0.1}>
+              <AnalyticsCharts 
+                title="Revenue Overview" 
+                type="area" 
+                data={[
+                  { name: "Jan", value: 4000 },
+                  { name: "Feb", value: 3000 },
+                  { name: "Mar", value: 5000 },
+                  { name: "Apr", value: 4500 },
+                  { name: "May", value: 6000 },
+                  { name: "Jun", value: 5500 },
+                ]} 
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <AnalyticsCharts 
+                title="User Growth" 
+                type="bar" 
+                data={[
+                  { name: "Mon", value: 120 },
+                  { name: "Tue", value: 150 },
+                  { name: "Wed", value: 180 },
+                  { name: "Thu", value: 220 },
+                  { name: "Fri", value: 190 },
+                  { name: "Sat", value: 250 },
+                  { name: "Sun", value: 310 },
+                ]} 
+              />
+            </ScrollReveal>
+          </div>
+
           <ScrollReveal>
+
             <h2 className="font-bold text-xl mb-6">Quick Actions</h2>
             <div className="grid md:grid-cols-3 gap-6">
               <ActionCard href={ROUTES.adminUsers} icon={Users} title="Manage Users" description="Strike, ban, or unban users" />

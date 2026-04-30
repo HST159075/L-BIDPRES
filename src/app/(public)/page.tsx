@@ -14,6 +14,18 @@ import { AuctionGridSkeleton } from "@/components/common/Skeleton";
 import { getAuctionsAction } from "@/actions/auction.actions";
 import { ROUTES } from "@/config/constants";
 
+// Client home sections
+import { CategoriesSection } from "@/components/home/CategoriesSection";
+import { WhyChooseUsSection } from "@/components/home/WhyChooseUsSection";
+import { StatsSection } from "@/components/home/StatsSection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { TrustSection } from "@/components/home/TrustSection";
+import { BlogPreviewSection } from "@/components/home/BlogPreviewSection";
+import { NewsletterSection } from "@/components/home/NewsletterSection";
+import { FAQSection } from "@/components/home/FAQSection";
+import { RecommendedAuctions } from "@/components/home/RecommendedAuctions";
+
+
 const STATS = [
   { key: "auctions", value: "2,400+", icon: TrendingUp },
   { key: "users", value: "18,000+", icon: Users },
@@ -23,13 +35,13 @@ const STATS = [
 
 export default async function HomePage() {
   const t = await getTranslations();
-  const { data: auctions } = await getAuctionsAction({ limit: 6 });
+  const { data: auctions } = await getAuctionsAction({ limit: 8 });
 
   return (
     <SmoothScroll>
       <div className="min-h-screen bg-[var(--color-background)]">
-        {/* ── Hero ─────────────────────────────────────────── */}
-        <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
+        {/* ── Section 1: Hero ─────────────────────────────────────────── */}
+        <section className="relative flex items-center overflow-hidden pt-16" style={{ minHeight: "65vh", maxHeight: "70vh" }}>
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-bid-950)]/20 via-transparent to-transparent" />
           <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-[var(--color-bid-500)]/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -98,7 +110,7 @@ export default async function HomePage() {
 
               {/* Right — 3D Scene (Client Component) */}
               <ScrollReveal delay={0.3} direction="left">
-                <div className="relative h-[500px] lg:h-[600px]">
+                <div className="relative h-[400px] lg:h-[500px]">
                   <HeroSceneWrapper />
                 </div>
               </ScrollReveal>
@@ -106,7 +118,10 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── Featured Auctions ───────────────────────────── */}
+        {/* ── Section 2: Categories ────────────────────────────────── */}
+        <CategoriesSection />
+
+        {/* ── Section 3: Featured Auctions ───────────────────────── */}
         <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <ScrollReveal>
             <div className="flex items-end justify-between mb-10">
@@ -128,9 +143,9 @@ export default async function HomePage() {
             </div>
           </ScrollReveal>
 
-          <Suspense fallback={<AuctionGridSkeleton count={6} />}>
+          <Suspense fallback={<AuctionGridSkeleton count={8} />}>
             {auctions.length > 0 ? (
-              <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <StaggerChildren className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {auctions.map((auction, i) => (
                   <StaggerItem key={auction.id}>
                     <AuctionCard auction={auction} index={i} />
@@ -148,7 +163,14 @@ export default async function HomePage() {
           </Suspense>
         </section>
 
-        {/* ── How it works ────────────────────────────────── */}
+        {/* ── Section 4: Recommended for You (AI) ────────────────── */}
+        <RecommendedAuctions />
+
+
+        {/* ── Section 4: Statistics Counter ──────────────────────── */}
+        <StatsSection />
+
+        {/* ── Section 5: How it works ────────────────────────────── */}
         <section className="py-24 bg-[var(--color-muted)]/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal className="text-center mb-16">
@@ -191,7 +213,25 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── CTA ─────────────────────────────────────────── */}
+        {/* ── Section 6: Why Choose Us ───────────────────────────── */}
+        <WhyChooseUsSection />
+
+        {/* ── Section 7: Trust & Security ────────────────────────── */}
+        <TrustSection />
+
+        {/* ── Section 8: Testimonials ────────────────────────────── */}
+        <TestimonialsSection />
+
+        {/* ── Section 9: Blog Preview ────────────────────────────── */}
+        <BlogPreviewSection />
+
+        {/* ── Section 10: FAQ ────────────────────────────────────── */}
+        <FAQSection />
+
+        {/* ── Section 11: Newsletter ─────────────────────────────── */}
+        <NewsletterSection />
+
+        {/* ── Section 12: CTA ────────────────────────────────────── */}
         <section className="py-24 px-4">
           <ScrollReveal>
             <div className="max-w-3xl mx-auto text-center space-y-6 bg-gradient-to-br from-[var(--color-bid-500)]/10 to-transparent border border-[var(--color-bid-500)]/20 rounded-3xl p-12">
@@ -199,7 +239,7 @@ export default async function HomePage() {
                 Ready to start bidding?
               </h2>
               <p className="text-[var(--color-muted-foreground)]">
-                Join thousands of buyers and sellers on Bangladeshs premier
+                Join thousands of buyers and sellers on Bangladesh&apos;s premier
                 auction platform.
               </p>
               <Link

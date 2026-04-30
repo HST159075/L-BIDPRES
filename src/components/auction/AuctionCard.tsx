@@ -116,6 +116,13 @@ export function AuctionCard({
                 <CountdownTimer endTime={auction.endTime} size="sm" />
               </div>
             )}
+
+            {/* View Details Button */}
+            <div className="pt-2">
+              <button className="w-full py-2.5 bg-muted hover:bg-bid-500 hover:text-white text-foreground text-sm font-bold rounded-xl transition-all duration-300">
+                View Details
+              </button>
+            </div>
           </div>
         </div>
       </Link>

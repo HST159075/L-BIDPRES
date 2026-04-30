@@ -1,9 +1,15 @@
 import Link from "next/link";
-import { Gavel, ArrowUpRight } from "lucide-react";
+import { Gavel, ArrowUpRight, Mail, Phone, MapPin } from "lucide-react";
 import { ROUTES } from "@/config/constants";
 
-interface FooterLink { label: string; href: string; }
-interface FooterSection { title: string; links: FooterLink[]; }
+interface FooterLink {
+  label: string;
+  href: string;
+}
+interface FooterSection {
+  title: string;
+  links: FooterLink[];
+}
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -15,6 +21,7 @@ export function Footer() {
         { label: "Browse Auctions", href: ROUTES.auctions },
         { label: "Become a Seller", href: ROUTES.sellerApply },
         { label: "Create Account", href: ROUTES.register },
+        { label: "How It Works", href: `${ROUTES.home}#how-it-works` },
       ],
     },
     {
@@ -23,15 +30,78 @@ export function Footer() {
         { label: "Login", href: ROUTES.login },
         { label: "Dashboard", href: ROUTES.buyerDashboard },
         { label: "Profile", href: ROUTES.buyerProfile },
+        { label: "My Bids", href: ROUTES.buyerBids },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { label: "About Us", href: ROUTES.about },
+        { label: "Contact", href: ROUTES.contact },
+        { label: "Blog", href: ROUTES.blog },
+        { label: "Help Center", href: ROUTES.help },
       ],
     },
     {
       title: "Legal",
       links: [
-        { label: "Terms of Service", href: "#" },
-        { label: "Privacy Policy", href: "#" },
-        { label: "Contact Us", href: "#" },
+        { label: "Terms of Service", href: ROUTES.terms },
+        { label: "Privacy Policy", href: ROUTES.privacy },
       ],
+    },
+  ];
+
+  const socialLinks = [
+    {
+      label: "Facebook",
+      href: "https://facebook.com/bidbd",
+      icon: (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#1877F2">
+          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Twitter",
+      href: "https://twitter.com/bidbd",
+      icon: (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Instagram",
+      href: "https://instagram.com/bidbd",
+      icon: (
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <circle cx="12" cy="12" r="4" />
+          <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      ),
+    },
+    {
+      label: "YouTube",
+      href: "https://youtube.com/@bidbd",
+      icon: (
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+          <polygon
+            points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"
+            fill="white"
+          />
+        </svg>
+      ),
     },
   ];
 
@@ -41,11 +111,13 @@ export function Footer() {
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[var(--color-bid-500)]/5 blur-3xl" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-10">
           {/* Brand */}
-          <div className="col-span-2 md:col-span-1 space-y-5">
-            <Link href={ROUTES.home} className="group flex items-center gap-2.5 w-fit">
+          <div className="col-span-2 space-y-5">
+            <Link
+              href={ROUTES.home}
+              className="group flex items-center gap-2.5 w-fit"
+            >
               <div className="relative w-10 h-10 bg-[var(--color-bid-500)] rounded-xl flex items-center justify-center shadow-lg shadow-[var(--color-bid-500)]/30 group-hover:shadow-[var(--color-bid-500)]/50 transition-shadow">
                 <Gavel className="w-5 h-5 text-white" />
                 <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -55,8 +127,48 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-              বাংলাদেশের প্রথম রিয়েল-টাইম অনলাইন অকশন প্ল্যাটফর্ম।
+              বাংলাদেশের প্রথম রিয়েল-টাইম অনলাইন অকশন প্ল্যাটফর্ম। Buy and sell
+              products & real estate through exciting live auctions.
             </p>
+
+            {/* Contact info */}
+            <div className="space-y-2.5">
+              <a
+                href="mailto:support@bidbd.com"
+                className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-bid-500)] transition-colors"
+              >
+                <Mail className="w-4 h-4 shrink-0" />
+                support@bidbd.com
+              </a>
+              <a
+                href="tel:+8801700000000"
+                className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-bid-500)] transition-colors"
+              >
+                <Phone className="w-4 h-4 shrink-0" />
+                +880 1700-000000
+              </a>
+              <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
+                <MapPin className="w-4 h-4 shrink-0" />
+                Dhaka, Bangladesh
+              </div>
+            </div>
+
+            {/* Social links */}
+            <div className="flex items-center gap-2 pt-2">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="w-9 h-9 rounded-xl bg-[var(--color-muted)] hover:bg-[var(--color-bid-500)]/10 flex items-center justify-center text-[var(--color-muted-foreground)] hover:text-[var(--color-bid-500)] transition-all"
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+
             {/* Live indicator */}
             <div className="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
               <span className="relative flex h-2 w-2">
@@ -95,9 +207,24 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-muted-foreground)]">
           <p>© {currentYear} BidBD. All rights reserved.</p>
-          <p className="flex items-center gap-1.5">
-            Made with <span className="text-red-500 animate-pulse">❤</span> in Bangladesh
-          </p>
+          <div className="flex items-center gap-4">
+            <Link
+              href={ROUTES.terms}
+              className="hover:text-[var(--color-foreground)] transition-colors"
+            >
+              Terms
+            </Link>
+            <Link
+              href={ROUTES.privacy}
+              className="hover:text-[var(--color-foreground)] transition-colors"
+            >
+              Privacy
+            </Link>
+            <p className="flex items-center gap-1.5">
+              Made with <span className="text-red-500 animate-pulse">❤</span> in
+              Bangladesh
+            </p>
+          </div>
         </div>
       </div>
     </footer>

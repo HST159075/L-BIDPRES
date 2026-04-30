@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/", "/auctions", "/login", "/register", "/payment"];
+const PUBLIC_ROUTES = ["/", "/auctions", "/login", "/register", "/payment", "/about", "/contact", "/blog", "/privacy", "/terms", "/help"];
 const AUTH_ROUTES = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
 
   const isLoggedIn = !!sessionCookie;
 
-  // ২. লগইন থাকলে লগইন/রেজিস্টার পেজে যেতে বাধা দেয়া
+  // ২. লগইন থাকলে লগইন/রেজিস্টার পেজে যেতে বাধা দেয়া
   if (isLoggedIn && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
   
   // অ্যাডমিন এবং সেলার রুট চেক
   const isAdminRoute = pathname.startsWith("/admin");
-  const isSellerRoute = pathname.startsWith("/seller");
+  const isSellerRoute = pathname.startsWith("/seller") || pathname.startsWith("/sdashboard") || pathname.startsWith("/slistings") || pathname.startsWith("/sapply");
 
   // ৪. প্রোটেকশন লজিক
   if (!isPublic && !isLoggedIn) {
@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ৫. রোল-বেসড অ্যাক্সেস কন্ট্রোল (Security Layer)
-  // নোট: টোকেন ডিকোড করা ছাড়া মিডলওয়্যারে রোল চেক করা কঠিন, 
+  // নোট: টোকেন ডিকোড করা ছাড়া মিডলওয়্যারে রোল চেক করা কঠিন, 
   // তবে কুকিতে 'user-role' সেভ থাকলে নিচের লজিক কাজ করবে।
   const userRole = request.cookies.get("user-role")?.value; // আপনার লগইন অ্যাকশনে এটি সেট করতে হবে
 
@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // API, Static assets, এবং images বাদ দিয়ে সব রুট
+    // API, Static assets, এবং images বাদ দিয়ে সব রুট
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
