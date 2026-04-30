@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { ROUTES, FAQ_DATA } from "@/config/constants";
 import { Search, ChevronDown, HelpCircle, ShoppingBag, CreditCard, Shield, Users, Gavel, Mail } from "lucide-react";
 
@@ -29,7 +27,6 @@ export default function HelpPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
-      <Navbar />
       <main className="pt-24 pb-16">
         {/* Hero with search */}
         <section className="bg-gradient-to-b from-[var(--color-bid-500)]/10 to-transparent py-16">
@@ -143,7 +140,6 @@ export default function HelpPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }

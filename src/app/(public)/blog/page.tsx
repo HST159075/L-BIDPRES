@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { BLOG_POSTS, ROUTES } from "@/config/constants";
 import { Calendar, Clock, ArrowRight, Search } from "lucide-react";
 
@@ -48,7 +46,6 @@ const ALL_POSTS = [
 export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
-      <Navbar />
       <main className="pt-24 pb-16">
         {/* Hero */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -148,7 +145,6 @@ export default function BlogPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 }
