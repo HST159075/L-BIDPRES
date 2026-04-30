@@ -119,13 +119,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocialLogin = (provider: "google" | "facebook") => {
-    // Better-Auth social login endpoint
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-    // Redirect to backend social login flow
-    window.location.href = `${baseUrl}/auth/login/social/${provider}?callbackURL=${window.location.origin}${ROUTES.buyerDashboard}`;
-  };
-
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) return;
     setOtpLoading(true);
@@ -273,13 +266,10 @@ export default function LoginPage() {
             </motion.div>
           ) : (
             <>
-              {/* Social login buttons */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleSocialLogin("google")}
-                  className="flex items-center justify-center gap-2 py-3 px-4 bg-[var(--color-muted)] hover:bg-[var(--color-accent)] border border-[var(--color-border)] rounded-xl transition-all group"
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18">
+              {/* Social Login Icons (Original) */}
+              <div className="flex justify-center gap-4 mb-6">
+                <div className="p-3 bg-[var(--color-muted)] rounded-full cursor-pointer hover:bg-[var(--color-accent)] transition-all">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                       fill="#4285F4"
@@ -297,28 +287,11 @@ export default function LoginPage() {
                       fill="#EA4335"
                     />
                   </svg>
-                  <span className="text-sm font-medium">Google</span>
-                </button>
-                <button
-                  onClick={() => handleSocialLogin("facebook")}
-                  className="flex items-center justify-center gap-2 py-3 px-4 bg-[var(--color-muted)] hover:bg-[var(--color-accent)] border border-[var(--color-border)] rounded-xl transition-all"
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="#1877F2">
+                </div>
+                <div className="p-3 bg-[var(--color-muted)] rounded-full cursor-pointer hover:bg-[var(--color-accent)] transition-all">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="#1877F2">
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                   </svg>
-                  <span className="text-sm font-medium">Facebook</span>
-                </button>
-              </div>
-
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[var(--color-border)]" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-[var(--color-background)] px-3 text-[var(--color-muted-foreground)]">
-                    or sign in with email
-                  </span>
                 </div>
               </div>
 
