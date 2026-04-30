@@ -28,7 +28,8 @@ export async function middleware(request: NextRequest) {
   
   // অ্যাডমিন এবং সেলার রুট চেক
   const isAdminRoute = pathname.startsWith("/admin");
-  const isSellerRoute = pathname.startsWith("/seller") || pathname.startsWith("/sdashboard") || pathname.startsWith("/slistings") || pathname.startsWith("/sapply");
+  const isSellerRoute = pathname.startsWith("/seller") || pathname.startsWith("/sdashboard") || pathname.startsWith("/slistings");
+  const isSapplyRoute = pathname.startsWith("/sapply");
 
   // ৪. প্রোটেকশন লজিক
   if (!isPublic && !isLoggedIn) {
@@ -48,6 +49,12 @@ export async function middleware(request: NextRequest) {
 
   if (isSellerRoute && userRole !== "seller" && userRole !== "admin") {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // /sapply রুটটি সেলার এবং অ্যাডমিনদের জন্য প্রয়োজন নেই (তারা অলরেডি সেলার/অ্যাডমিন)
+  // তবে বায়ারদের জন্য এটি এলাউ করতে হবে।
+  if (isSapplyRoute && userRole === "seller") {
+    return NextResponse.redirect(new URL("/sdashboard", request.url));
   }
 
   const response = NextResponse.next();

@@ -90,7 +90,7 @@ export default function BuyerDashboardPage() {
     { label: "Strikes", value: user?.strikeCount || 0, icon: Bell, color: "text-red-500" },
   ];
 
-  const canApplyForSeller = (user?.purchaseCount || 0) >= 5 && user?.role === "buyer";
+  const canApplyForSeller = (user?.purchaseCount || 0) >= 1 && user?.role === "buyer";
 
   return (
     <SmoothScroll>

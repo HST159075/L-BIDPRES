@@ -69,9 +69,9 @@ export const ROUTES = {
 
 // Demo credentials for demo login
 export const DEMO_CREDENTIALS = {
-  buyer: { identifier: "demo@bidbd.com", password: "Demo@1234" },
-  seller: { identifier: "seller@bidbd.com", password: "Demo@1234" },
-  admin: { identifier: "admin@bidbd.com", password: "Admin@1234" },
+  buyer: { identifier: "buyer@demo.com", password: "Buyer@1234" },
+  seller: { identifier: "seller@demo.com", password: "Seller@1234" },
+  admin: { identifier: "hsttasin90@gmail.com", password: "Admin@1234" },
 };
 
 // Testimonials data

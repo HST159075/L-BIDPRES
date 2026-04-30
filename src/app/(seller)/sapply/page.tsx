@@ -42,7 +42,7 @@ export default function SellerApplyPage() {
       .catch(() => setAppStatus(null));
   }, [user, isSeller]);
 
-  const canApply = (user?.purchaseCount || 0) >= 5;
+  const canApply = (user?.purchaseCount || 0) >= 1;
 
   const handleFileUpload = async (
     file: File,
@@ -61,7 +61,7 @@ export default function SellerApplyPage() {
 
   const onSubmit = async (data: ApplyForm) => {
     if (!canApply) {
-      showError({ message: "You need at least 5 purchases to apply" });
+      showError({ message: "You need at least 1 purchase to apply" });
       return;
     }
     setIsApplying(true);
@@ -126,15 +126,15 @@ export default function SellerApplyPage() {
               <div className="bg-card border border-border rounded-2xl p-6">
                 <h2 className="font-semibold mb-4">Requirements</h2>
                 <div className="space-y-3">
-                  <div className={`flex items-start gap-3 p-3 rounded-lg ${(user?.purchaseCount || 0) >= 5 ? "bg-green-500/10" : "bg-yellow-500/10"}`}>
-                    {(user?.purchaseCount || 0) >= 5 ? (
+                  <div className={`flex items-start gap-3 p-3 rounded-lg ${(user?.purchaseCount || 0) >= 1 ? "bg-green-500/10" : "bg-yellow-500/10"}`}>
+                    {(user?.purchaseCount || 0) >= 1 ? (
                       <CheckCircle className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
                     )}
                     <div className="text-sm">
-                      <p className="font-medium">Minimum 5 purchases</p>
-                      <p className="text-muted-foreground">You have {user?.purchaseCount || 0}/5</p>
+                      <p className="font-medium">Minimum 1 purchase</p>
+                      <p className="text-muted-foreground">You have {user?.purchaseCount || 0}/1</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
@@ -222,7 +222,7 @@ export default function SellerApplyPage() {
 
                 {!canApply && (
                   <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-sm text-yellow-700">
-                    ⚠️ You need at least 5 purchases to apply. Keep bidding!
+                    ⚠️ You need at least 1 purchase to apply. Keep bidding!
                   </div>
                 )}
               </form>
