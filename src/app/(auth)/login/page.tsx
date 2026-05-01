@@ -104,7 +104,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = async (role: "buyer" | "seller" | "admin") => {
+  const handleDemoLogin = async (role: "buyer" | "seller" ) => {
     const creds = DEMO_CREDENTIALS[role];
     setDemoLoading(role);
     form.setValue("identifier", creds.identifier);
@@ -362,7 +362,7 @@ export default function LoginPage() {
                     Quick Demo Access
                   </p>
                   <div className="grid grid-cols-3 gap-2">
-                    {(["buyer", "seller", "admin"] as const).map((role) => (
+                    {(["buyer", "seller", ] as const).map((role) => (
                       <button
                         key={role}
                         onClick={() => handleDemoLogin(role)}
