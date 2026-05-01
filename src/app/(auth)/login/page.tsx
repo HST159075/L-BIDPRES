@@ -112,8 +112,8 @@ export default function LoginPage() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/callback",
-        errorCallbackURL: "/login?error=google_failed",
+        callbackURL: `${window.location.origin}/callback`,
+        errorCallbackURL: `${window.location.origin}/login?error=google_failed`,
       });
     } catch {
       showError("Google login failed. Please try again.");
