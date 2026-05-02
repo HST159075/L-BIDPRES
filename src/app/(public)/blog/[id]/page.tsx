@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BLOG_POSTS, ROUTES } from "@/config/constants";
+import { BLOG_POSTS, ROUTES } from "../../../../config/constants";
 import { Calendar, Clock, User, ArrowLeft, Share2, Link2 } from "lucide-react";
 
 interface PostPageProps {
@@ -9,7 +9,8 @@ interface PostPageProps {
 }
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
-  const post = BLOG_POSTS.find(p => p.id === params.id);
+  const { id } = await params;
+  const post = BLOG_POSTS.find(p => p.id === id);
   if (!post) return { title: "Post Not Found" };
   return {
     title: post.title,
@@ -17,8 +18,9 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   };
 }
 
-export default function BlogPostPage({ params }: PostPageProps) {
-  const post = BLOG_POSTS.find(p => p.id === params.id);
+export default async function BlogPostPage({ params }: PostPageProps) {
+  const { id } = await params;
+  const post = BLOG_POSTS.find(p => p.id === id);
 
   if (!post) {
     notFound();
@@ -81,7 +83,7 @@ export default function BlogPostPage({ params }: PostPageProps) {
 
             <h3 className="text-2xl font-bold pt-4">The Psychology of Bidding</h3>
             <p>
-              Success in auctions isn't just about having the most money; it's about strategy. Many users fall into the trap 
+              Success in auctions is not just about having the most money; it about strategy. Many users fall into the trap 
               of emotional bidding, where they exceed their budget in the heat of the moment. To avoid this, we recommend 
               using our auto-bid feature, which allows you to set a maximum limit and let our system handle the incremental bids.
             </p>
@@ -97,8 +99,8 @@ export default function BlogPostPage({ params }: PostPageProps) {
             </div>
 
             <p>
-              Another crucial factor is timing. While many wait until the last few seconds (a tactic known as "sniping"), 
-              BidBD's real-time sync ensures that every bid is captured. Our platform extensions prevent last-second sniping 
+              Another crucial factor is timing. While many wait until the last few seconds (a tactic known as SNIPING), 
+              BidBD real-time sync ensures that every bid is captured. Our platform extensions prevent last-second sniping 
               by adding a small amount of time if a bid is placed in the final minute, ensuring a fair chance for everyone.
             </p>
           </div>
