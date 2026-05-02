@@ -46,8 +46,9 @@ export function AIChatbot() {
 
       const aiText = response.data?.data?.response || "Sorry, I couldn't process that.";
       setMessages(prev => [...prev, { role: "model", content: aiText }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: "model", content: "I'm having trouble connecting right now. Please try again later." }]);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "I'm having trouble connecting right now. Please try again later.";
+      setMessages(prev => [...prev, { role: "model", content: errorMessage }]);
     } finally {
       setIsLoading(false);
     }
