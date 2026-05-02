@@ -21,6 +21,14 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/auth/:path*",
+        destination: "https://s-bidpres.onrender.com/api/auth/:path*",
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
