@@ -19,22 +19,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         // 1. Storage theke token load kora ebong axios-e set kora
-        // loadStoredToken function-ti apnar api.ts theke asche ja header set kore dey
-        const token = loadStoredToken();
+        loadStoredToken();
 
-        if (!token) {
+        // 2. User profile fetch kora (HttpOnly cookie thakle eta kaaj korbe)
+        try {
+          const user = await authService.getMe();
+          setUser(user);
+        } catch (err) {
+          // Profile fetch fail hole user null set kora
           setUser(null);
-          return;
         }
 
-        // 2. Token thakle user profile fetch kora
-        const user = await authService.getMe();
-        
-        // Middleware-er jonno cookie sync kora
-        const { setAuthToken } = await import("@/lib/api");
-        setAuthToken(token, user.role);
-
-        setUser(user);
       } catch (error) {
         // 3. Token invalid hole shob clear kora
         console.error("Auth initialization failed:", error);
