@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         destination: "https://s-bidpres.onrender.com/api/:path*",
       },
+      {
+        source: "/socket.io/:path*",
+        destination: "https://s-bidpres.onrender.com/socket.io/:path*",
+      },
     ];
   },
 };
