@@ -24,8 +24,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/auth/:path*",
-        destination: "https://s-bidpres.onrender.com/api/auth/:path*",
+        source: "/api/:path*",
+        destination: "https://s-bidpres.onrender.com/api/:path*",
       },
     ];
   },
