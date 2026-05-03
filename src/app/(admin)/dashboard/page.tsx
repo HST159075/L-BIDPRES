@@ -109,16 +109,40 @@ export default function AdminDashboardPage() {
               </StaggerItem>
             ))}
           </StaggerChildren>
-
+          
           <div className="grid lg:grid-cols-2 gap-8 mb-12">
             <ScrollReveal delay={0.1}>
+              <AnalyticsCharts 
+                title="User Distribution" 
+                type="pie" 
+                data={[
+                  { name: "Buyers", value: Math.max(0, (analytics.totalUsers || 0) - (analytics.totalSellers || 0)) },
+                  { name: "Sellers", value: analytics.totalSellers || 0 },
+                ]} 
+              />
+            </ScrollReveal>
+            <ScrollReveal delay={0.2}>
+              <AnalyticsCharts 
+                title="Listing Status" 
+                type="pie" 
+                data={[
+                  { name: "Live", value: analytics.activeAuctions || 0 },
+                  { name: "Won", value: analytics.wonAuctions || 0 },
+                  { name: "Ended/Draft", value: Math.max(0, (analytics.totalListings || 0) - (analytics.activeAuctions || 0) - (analytics.wonAuctions || 0)) },
+                ]} 
+              />
+            </ScrollReveal>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 mb-12">
+            <ScrollReveal delay={0.3}>
               <AnalyticsCharts 
                 title="Revenue Overview" 
                 type="area" 
                 data={analytics.revenueChart || []} 
               />
             </ScrollReveal>
-            <ScrollReveal delay={0.2}>
+            <ScrollReveal delay={0.4}>
               <AnalyticsCharts 
                 title="User Growth" 
                 type="bar" 

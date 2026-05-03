@@ -20,7 +20,12 @@ interface Listing {
   title: string;
   status: string;
   photos: string[];
-  auction?: { currentPrice: number; status: string };
+  auction?: { 
+    currentPrice: number; 
+    finalPrice?: number | null;
+    status: string;
+    winnerId?: string | null;
+  };
 }
 
 export default function SellerListingsPage() {
@@ -176,10 +181,12 @@ export default function SellerListingsPage() {
                               ? "bg-green-500/10 text-green-500"
                               : listing.auction?.status === "scheduled"
                                 ? "bg-blue-500/10 text-blue-500"
-                                : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
+                                : listing.auction?.winnerId
+                                  ? "bg-amber-500/10 text-amber-500"
+                                  : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
                           }`}
                         >
-                          {listing.auction?.status || listing.status}
+                          {listing.auction?.winnerId ? "Sold" : (listing.auction?.status || listing.status)}
                         </span>
                         {listing.auction?.currentPrice && (
                           <span className="text-xs font-medium text-[var(--color-foreground)]">

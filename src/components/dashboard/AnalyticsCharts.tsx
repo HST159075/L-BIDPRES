@@ -15,6 +15,7 @@ import {
   Cell,
   PieChart,
   Pie,
+  Legend,
 } from "recharts";
 
 interface AnalyticsChartsProps {
@@ -95,12 +96,22 @@ export function AnalyticsCharts({ data, type = "bar", title }: AnalyticsChartsPr
                 outerRadius={80}
                 paddingAngle={5}
                 dataKey="value"
+                nameKey="name"
+                label={({ name, percent }) => `${name} ${(percent ? percent * 100 : 0).toFixed(0)}%`}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: "var(--color-card)", 
+                  borderRadius: "12px", 
+                  border: "1px solid var(--color-border)",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+                }} 
+              />
+              <Legend verticalAlign="bottom" height={36}/>
             </PieChart>
           )}
         </ResponsiveContainer>

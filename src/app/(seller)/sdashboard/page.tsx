@@ -28,7 +28,13 @@ interface Listing {
   title: string;
   status: string;
   photos: string[];
-  auction?: { currentPrice: number; status: string; endTime: string };
+  auction?: { 
+    currentPrice: number; 
+    finalPrice?: number | null;
+    status: string; 
+    endTime: string;
+    winnerId?: string | null;
+  };
 }
 
 export default function SellerDashboardPage() {
@@ -76,7 +82,12 @@ export default function SellerDashboardPage() {
   const endedCount = listings.filter((l) => l.auction?.status === "ended").length;
   
   
-  const totalRevenue = 0; 
+  const totalRevenue = listings.reduce((acc, l) => {
+    if (l.auction?.status === "ended" && l.auction?.winnerId) {
+      return acc + Number(l.auction.finalPrice || l.auction.currentPrice || 0);
+    }
+    return acc;
+  }, 0);
 
   const stats = [
     {
@@ -217,10 +228,12 @@ export default function SellerDashboardPage() {
                                 ? "bg-green-500/10 text-green-500"
                                 : listing.auction?.status === "scheduled"
                                   ? "bg-blue-500/10 text-blue-500"
-                                  : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
+                                  : listing.auction?.winnerId
+                                    ? "bg-amber-500/10 text-amber-500"
+                                    : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
                             }`}
                           >
-                            {listing.auction?.status || listing.status}
+                            {listing.auction?.winnerId ? "Sold" : (listing.auction?.status || listing.status)}
                           </span>
                           {listing.auction?.currentPrice && (
                             <span className="text-xs font-semibold text-[var(--color-foreground)]">
