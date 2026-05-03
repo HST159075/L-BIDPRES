@@ -17,7 +17,9 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = !!sessionCookie;
 
   // ২. লগইন থাকলে লগইন/রেজিস্টার পেজে যেতে বাধা দেয়া
-  if (isLoggedIn && AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
+  // তবে যদি কুয়েরি প্যারামিটারে error থাকে তবে রিডাইরেক্ট করবেন না (লুপ ঠেকানোর জন্য)
+  const hasError = request.nextUrl.searchParams.has("error");
+  if (isLoggedIn && AUTH_ROUTES.some((r) => pathname.startsWith(r)) && !hasError) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

@@ -34,10 +34,12 @@ export function setAuthToken(token: string | null, role?: string | null) {
     }
   } else {
     delete api.defaults.headers.common["Authorization"];
-    storage?.removeItem(TOKEN_KEY);
-    storage?.removeItem("bid_user_role");
     Cookies.remove("session");
     Cookies.remove("user-role");
+    Cookies.remove("bidpress.session_token");
+    Cookies.remove("__Secure-bidpress.session_token");
+    storage?.removeItem(TOKEN_KEY);
+    storage?.removeItem("bid_user_role");
   }
 }
 
