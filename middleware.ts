@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/", "/auctions", "/login", "/register", "/payment", "/about", "/contact", "/blog", "/privacy", "/terms", "/help"];
+const PUBLIC_ROUTES = ["/", "/auctions", "/login", "/register", "/payment", "/about", "/contact", "/blog", "/privacy", "/terms", "/help", "/callback"];
 const AUTH_ROUTES = ["/login", "/register"];
 
 export async function middleware(request: NextRequest) {
@@ -11,8 +11,8 @@ export async function middleware(request: NextRequest) {
   // ১. সেশন কুকি চেক (ম্যানুয়াল এবং Better-Auth উভয়ই)
   const sessionCookie =
     request.cookies.get("session")?.value ||
-    request.cookies.get("better-auth.session_token")?.value ||
-    request.cookies.get("__Secure-better-auth.session_token")?.value;
+    request.cookies.get("bidpress.session_token")?.value ||
+    request.cookies.get("__Secure-bidpress.session_token")?.value;
 
   const isLoggedIn = !!sessionCookie;
 
