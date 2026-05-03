@@ -10,13 +10,10 @@ const TOKEN_KEY = "bid_auth_token";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { isInitialized, setUser, setLoading, setInitialized } = useAuthStore();
 
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+
   useEffect(() => {
     if (isInitialized) return;
-    
-    // Callback page handle korche, tai AuthProvider wait korbe
-    if (typeof window !== "undefined" && window.location.pathname === "/callback") {
-      return;
-    }
 
     const bootstrapAuth = async () => {
       setLoading(true);
@@ -46,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     bootstrapAuth();
-  }, [isInitialized, setUser, setLoading, setInitialized]);
+  }, [isInitialized, setUser, setLoading, setInitialized, pathname]);
 
   return <>{children}</>;
 }
