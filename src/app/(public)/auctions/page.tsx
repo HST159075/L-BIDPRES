@@ -42,21 +42,35 @@ export default function AuctionsPage() {
   const fetchAuctions = useCallback(async () => {
     setLoading(true);
     try {
-      const filter: AuctionFilter = {
+      const filter: any = {
         search: debouncedSearch || undefined,
         category: category || undefined,
         condition: condition || undefined,
         minPrice: minPrice ? Number(minPrice) : undefined,
         maxPrice: maxPrice ? Number(maxPrice) : undefined,
-        sortBy: sort.includes("price") ? "price" : sort === "newest" ? "createdAt" : undefined,
-        sortOrder: sort.endsWith("low") ? "asc" : "desc",
+        sortBy: sort, // সরাসরি সর্ট ভ্যালু পাঠানো (newest, price_low, etc.)
         page,
         limit,
       };
-      const res = await auctionService.getAll(filter);
-      setAuctions(res.data);
+      
+      // /auctions এর বদলে /listings এন্ডপয়েন্ট ইউজ করা হচ্ছে ফিল্টারিং এর জন্য
+      const res = await auctionService.getListings(filter);
+      
+      // ডাটা ট্রান্সফর্ম করা হচ্ছে যাতে AuctionCard ঠিকমতো কাজ করে
+      const transformedData = res.data.map((item: any) => ({
+        ...item.auction,
+        id: item.auction?.id || item.id, // Auction ID অথবা Listing ID
+        listingId: item.id,
+        listing: {
+          ...item,
+          auction: undefined // সার্কুলার রেফারেন্স এড়াতে
+        }
+      }));
+
+      setAuctions(transformedData as any);
       setTotal(res.total);
-    } catch {
+    } catch (err) {
+      console.error("Fetch error:", err);
       setAuctions([]);
     } finally {
       setLoading(false);
