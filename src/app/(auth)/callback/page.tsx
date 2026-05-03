@@ -51,6 +51,10 @@ export default function CallbackPage() {
           setUser(mappedUser);
           setInitialized(true);
 
+          // Middleware-er jonno role cookie sync kora
+          const Cookies = (await import("js-cookie")).default;
+          Cookies.set("user-role", mappedUser.role, { expires: 7, path: '/' });
+
           //  role onojaie
           const redirects: Record<UserRole, string> = {
             admin: ROUTES.adminDashboard,
