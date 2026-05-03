@@ -31,7 +31,7 @@ async function adminFetch(path: string, options: RequestInit = {}) {
 }
 
 export async function getAnalyticsAction() {
-  return adminFetch("/admin/analytics");
+  return adminFetch("/analytics/admin");
 }
 
 

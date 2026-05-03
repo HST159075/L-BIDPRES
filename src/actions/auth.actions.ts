@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ROUTES }   from "@/config/constants";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://s-bidpres.onrender.com/api/v1";
 
 async function serverFetch<T>(
   path: string,
@@ -12,13 +12,16 @@ async function serverFetch<T>(
 ): Promise<{ data?: T; error?: string }> {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("better-auth.session_token");
+    const sessionCookie = cookieStore.get("bidpress.session_token") || 
+                         cookieStore.get("__Secure-bidpress.session_token") ||
+                         cookieStore.get("session");
 
     const res = await fetch(`${API}${path}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        ...(sessionCookie ? { Cookie: `better-auth.session_token=${sessionCookie.value}` } : {}),
+        ...(sessionCookie ? { Cookie: `${sessionCookie.name}=${sessionCookie.value}` } : {}),
+        ...(sessionCookie ? { Authorization: `Bearer ${sessionCookie.value}` } : {}),
         ...options.headers,
       },
       cache: "no-store",
@@ -83,6 +86,9 @@ export async function getMeAction() {
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  cookieStore.delete("better-auth.session_token");
+  cookieStore.delete("bidpress.session_token");
+  cookieStore.delete("__Secure-bidpress.session_token");
+  cookieStore.delete("session");
+  cookieStore.delete("user-role");
   redirect(ROUTES.login);
 }

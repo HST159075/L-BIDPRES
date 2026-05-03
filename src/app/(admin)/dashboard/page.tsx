@@ -64,7 +64,15 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     if (!authLoading && user) {
       getAnalyticsAction()
-        .then((res) => setAnalytics(res.data?.data || {}))
+        .then((res) => {
+          const data = res.data?.data;
+          if (data) {
+            setAnalytics({
+              ...data,
+              ...data.overview // Spread overview fields like totalUsers into the flat analytics state
+            });
+          }
+        })
         .catch(() => {})
         .finally(() => setLoading(false));
     }
