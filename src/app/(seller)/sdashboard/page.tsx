@@ -28,10 +28,10 @@ interface Listing {
   title: string;
   status: string;
   photos: string[];
-  auction?: { 
-    currentPrice: number; 
+  auction?: {
+    currentPrice: number;
     finalPrice?: number | null;
-    status: string; 
+    status: string;
     endTime: string;
     winnerId?: string | null;
   };
@@ -76,12 +76,14 @@ export default function SellerDashboardPage() {
     );
   }
 
-
-  const activeCount = listings.filter((l) => l.auction?.status === "live").length;
+  const activeCount = listings.filter(
+    (l) => l.auction?.status === "live",
+  ).length;
   const totalCount = listings.length;
-  const endedCount = listings.filter((l) => l.auction?.status === "ended").length;
-  
-  
+  const endedCount = listings.filter(
+    (l) => l.auction?.status === "ended",
+  ).length;
+
   const totalRevenue = listings.reduce((acc, l) => {
     if (l.auction?.status === "ended" && l.auction?.winnerId) {
       return acc + Number(l.auction.finalPrice || l.auction.currentPrice || 0);
@@ -108,11 +110,11 @@ export default function SellerDashboardPage() {
       icon: BarChart3,
       color: "text-amber-500",
     },
-    { 
-      label: "Total Revenue", 
-      value: formatPriceEn(totalRevenue), 
-      icon: Gavel, 
-      color: "text-[var(--color-bid-500)]" 
+    {
+      label: "Total Revenue",
+      value: formatPriceEn(totalRevenue),
+      icon: Gavel,
+      color: "text-[var(--color-bid-500)]",
     },
   ];
 
@@ -128,7 +130,7 @@ export default function SellerDashboardPage() {
                 Seller Control Center
               </p>
               <h1 className="text-3xl font-bold mt-1 text-[var(--color-foreground)]">
-                Welcome, {user?.name.split(' ')[0]}!
+                Welcome, {user?.name.split(" ")[0]}!
               </h1>
             </div>
             <Link
@@ -150,7 +152,9 @@ export default function SellerDashboardPage() {
                     <stat.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-[var(--color-foreground)]">{stat.value}</p>
+                    <p className="text-2xl font-bold text-[var(--color-foreground)]">
+                      {stat.value}
+                    </p>
                     <p className="text-xs text-[var(--color-muted-foreground)] font-medium uppercase tracking-wider">
                       {stat.label}
                     </p>
@@ -164,7 +168,9 @@ export default function SellerDashboardPage() {
           <ScrollReveal>
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-bold text-xl text-[var(--color-foreground)]">Recent Activity</h2>
+                <h2 className="font-bold text-xl text-[var(--color-foreground)]">
+                  Recent Activity
+                </h2>
                 <Link
                   href={ROUTES.sellerListings}
                   className="flex items-center gap-1 text-sm font-semibold text-[var(--color-bid-500)] hover:text-[var(--color-bid-600)] transition-colors"
@@ -216,7 +222,7 @@ export default function SellerDashboardPage() {
                           <Package className="w-6 h-6 text-[var(--color-muted-foreground)] opacity-20" />
                         </div>
                       )}
-                      
+
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-[var(--color-foreground)] truncate group-hover:text-[var(--color-bid-500)] transition-colors">
                           {listing.title}
@@ -233,11 +239,15 @@ export default function SellerDashboardPage() {
                                     : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"
                             }`}
                           >
-                            {listing.auction?.winnerId ? "Sold" : (listing.auction?.status || listing.status)}
+                            {listing.auction?.winnerId
+                              ? "Sold"
+                              : listing.auction?.status || listing.status}
                           </span>
                           {listing.auction?.currentPrice && (
                             <span className="text-xs font-semibold text-[var(--color-foreground)]">
-                              {formatPriceEn(Number(listing.auction.currentPrice))}
+                              {formatPriceEn(
+                                Number(listing.auction.currentPrice),
+                              )}
                             </span>
                           )}
                         </div>

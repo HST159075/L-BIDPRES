@@ -5,7 +5,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import { Camera, Save, Loader, ShieldCheck, ShoppingBag, AlertTriangle, Calendar } from "lucide-react";
+import {
+  Camera,
+  Save,
+  Loader,
+  ShieldCheck,
+  ShoppingBag,
+  AlertTriangle,
+  Calendar,
+} from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { ScrollReveal } from "@/components/animations/ScrollReveal";
 import { SmoothScroll } from "@/components/animations/SmoothScroll";
@@ -24,7 +32,9 @@ export default function BuyerProfilePage() {
   const { user, isLoading } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatar || "");
+  const [avatarPreview, setAvatarPreview] = useState<string>(
+    user?.avatar || "",
+  );
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -67,10 +77,37 @@ export default function BuyerProfilePage() {
   }
 
   const stats = [
-    { icon: ShoppingBag, label: "Purchases", value: user?.purchaseCount || 0, color: "text-green-500", bg: "bg-green-500/10" },
-    { icon: AlertTriangle, label: "Strikes", value: `${user?.strikeCount || 0}/3`, color: "text-red-500", bg: "bg-red-500/10" },
-    { icon: ShieldCheck, label: "Role", value: user?.role || "buyer", color: "text-blue-500", bg: "bg-blue-500/10" },
-    { icon: Calendar, label: "Joined", value: new Date(user?.createdAt || "").toLocaleDateString("en-GB", { month: "short", year: "numeric" }), color: "text-purple-500", bg: "bg-purple-500/10" },
+    {
+      icon: ShoppingBag,
+      label: "Purchases",
+      value: user?.purchaseCount || 0,
+      color: "text-green-500",
+      bg: "bg-green-500/10",
+    },
+    {
+      icon: AlertTriangle,
+      label: "Strikes",
+      value: `${user?.strikeCount || 0}/3`,
+      color: "text-red-500",
+      bg: "bg-red-500/10",
+    },
+    {
+      icon: ShieldCheck,
+      label: "Role",
+      value: user?.role || "buyer",
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      icon: Calendar,
+      label: "Joined",
+      value: new Date(user?.createdAt || "").toLocaleDateString("en-GB", {
+        month: "short",
+        year: "numeric",
+      }),
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+    },
   ];
 
   return (
@@ -78,10 +115,11 @@ export default function BuyerProfilePage() {
       <div className="min-h-screen bg-[var(--color-background)]">
         <Navbar />
         <div className="pt-20 pb-16 max-w-2xl mx-auto px-4 sm:px-6">
-
           <ScrollReveal className="mt-8 mb-8">
             <h1 className="text-3xl font-bold">Profile Settings</h1>
-            <p className="text-[var(--color-muted-foreground)] mt-1">Manage your account</p>
+            <p className="text-[var(--color-muted-foreground)] mt-1">
+              Manage your account
+            </p>
           </ScrollReveal>
 
           {/* Avatar section */}
@@ -90,7 +128,11 @@ export default function BuyerProfilePage() {
               <div className="relative group">
                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[var(--color-bid-500)]/30 shadow-xl">
                   {avatarPreview ? (
-                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                    <img
+                      src={avatarPreview}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full bg-[var(--color-bid-500)]/20 flex items-center justify-center">
                       <span className="text-3xl font-bold text-[var(--color-bid-500)]">
@@ -105,11 +147,18 @@ export default function BuyerProfilePage() {
                   ) : (
                     <Camera className="w-4 h-4 text-white" />
                   )}
-                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
                 </label>
               </div>
               <p className="mt-3 font-semibold text-lg">{user?.name}</p>
-              <p className="text-sm text-[var(--color-muted-foreground)]">{user?.email || user?.phone}</p>
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                {user?.email || user?.phone}
+              </p>
             </div>
           </ScrollReveal>
 
@@ -117,12 +166,19 @@ export default function BuyerProfilePage() {
           <ScrollReveal className="mb-6">
             <div className="grid grid-cols-4 gap-3">
               {stats.map((stat) => (
-                <div key={stat.label} className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-3 text-center">
-                  <div className={`w-8 h-8 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center mx-auto mb-2`}>
+                <div
+                  key={stat.label}
+                  className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-3 text-center"
+                >
+                  <div
+                    className={`w-8 h-8 rounded-lg ${stat.bg} ${stat.color} flex items-center justify-center mx-auto mb-2`}
+                  >
                     <stat.icon className="w-4 h-4" />
                   </div>
                   <p className="font-bold text-sm capitalize">{stat.value}</p>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">{stat.label}</p>
+                  <p className="text-xs text-[var(--color-muted-foreground)]">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
             </div>
@@ -130,23 +186,31 @@ export default function BuyerProfilePage() {
 
           {/* Form */}
           <ScrollReveal>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 space-y-5">
-              
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 space-y-5"
+            >
               <div>
-                <label className="text-sm font-semibold mb-2 block">Full Name</label>
+                <label className="text-sm font-semibold mb-2 block">
+                  Full Name
+                </label>
                 <input
                   {...form.register("name")}
                   className="w-full px-4 py-3 bg-[var(--color-muted)] border border-[var(--color-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-bid-500)] transition-all"
                 />
                 {form.formState.errors.name && (
-                  <p className="text-xs text-destructive mt-1">{form.formState.errors.name.message}</p>
+                  <p className="text-xs text-destructive mt-1">
+                    {form.formState.errors.name.message}
+                  </p>
                 )}
               </div>
 
-              {/* Email readonly */}
+              {/* Email read only */}
               {user?.email && (
                 <div>
-                  <label className="text-sm font-semibold mb-2 block text-[var(--color-muted-foreground)]">Email</label>
+                  <label className="text-sm font-semibold mb-2 block text-[var(--color-muted-foreground)]">
+                    Email
+                  </label>
                   <input
                     type="email"
                     value={user.email}
@@ -156,10 +220,12 @@ export default function BuyerProfilePage() {
                 </div>
               )}
 
-              {/* Phone readonly */}
+              {/* Phone read only */}
               {user?.phone && (
                 <div>
-                  <label className="text-sm font-semibold mb-2 block text-[var(--color-muted-foreground)]">Phone</label>
+                  <label className="text-sm font-semibold mb-2 block text-[var(--color-muted-foreground)]">
+                    Phone
+                  </label>
                   <input
                     type="tel"
                     value={user.phone}
@@ -176,9 +242,13 @@ export default function BuyerProfilePage() {
                 className="w-full py-3.5 bg-[var(--color-bid-500)] hover:bg-[var(--color-bid-600)] text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isSaving ? (
-                  <><Loader className="w-4 h-4 animate-spin" /> Saving...</>
+                  <>
+                    <Loader className="w-4 h-4 animate-spin" /> Saving...
+                  </>
                 ) : (
-                  <><Save className="w-4 h-4" /> Save Changes</>
+                  <>
+                    <Save className="w-4 h-4" /> Save Changes
+                  </>
                 )}
               </motion.button>
             </form>

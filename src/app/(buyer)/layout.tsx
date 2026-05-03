@@ -14,7 +14,6 @@ export default function BuyerLayout({
   const { user, isInitialized, isLoading } = useAuthStore();
 
   useEffect(() => {
-    // Wait until auth is fully initialized before redirecting
     if (!isInitialized || isLoading) return;
     if (!user) router.replace(`${ROUTES.login}?from=/bdashboard`);
   }, [user, isInitialized, isLoading, router]);
@@ -28,7 +27,6 @@ export default function BuyerLayout({
     );
   }
 
-  // Don't render children if not logged in
   if (!user) return null;
 
   return <>{children}</>;

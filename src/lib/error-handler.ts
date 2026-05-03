@@ -22,7 +22,17 @@ export function handleError(error: unknown): AppError {
 }
 
 export function showError(error: unknown): void {
-  const { message } = handleError(error);
+  const err = handleError(error);
+  let message = err.message;
+
+  // Validation error হলে specific field error দেখান
+  if (err.status === 400 && Array.isArray(err.details)) {
+    const firstError = err.details[0];
+    if (firstError?.message) {
+      message = `${firstError.message}`;
+    }
+  }
+
   toast.error(message);
 }
 

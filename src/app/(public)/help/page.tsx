@@ -4,15 +4,55 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ROUTES, FAQ_DATA } from "@/config/constants";
-import { Search, ChevronDown, HelpCircle, ShoppingBag, CreditCard, Shield, Users, Gavel, Mail } from "lucide-react";
+import {
+  Search,
+  ChevronDown,
+  HelpCircle,
+  ShoppingBag,
+  CreditCard,
+  Shield,
+  Users,
+  Gavel,
+  Mail,
+} from "lucide-react";
 
 const HELP_CATEGORIES = [
-  { icon: ShoppingBag, title: "Buying", desc: "How to bid, win, and receive items", count: 12 },
-  { icon: Gavel, title: "Selling", desc: "Listing items and managing auctions", count: 8 },
-  { icon: CreditCard, title: "Payments", desc: "Payment methods, refunds, and fees", count: 10 },
-  { icon: Users, title: "Account", desc: "Registration, profile, and settings", count: 6 },
-  { icon: Shield, title: "Safety", desc: "Fraud prevention and dispute resolution", count: 5 },
-  { icon: HelpCircle, title: "General", desc: "Platform rules and other topics", count: 7 },
+  {
+    icon: ShoppingBag,
+    title: "Buying",
+    desc: "How to bid, win, and receive items",
+    count: 12,
+  },
+  {
+    icon: Gavel,
+    title: "Selling",
+    desc: "Listing items and managing auctions",
+    count: 8,
+  },
+  {
+    icon: CreditCard,
+    title: "Payments",
+    desc: "Payment methods, refunds, and fees",
+    count: 10,
+  },
+  {
+    icon: Users,
+    title: "Account",
+    desc: "Registration, profile, and settings",
+    count: 6,
+  },
+  {
+    icon: Shield,
+    title: "Safety",
+    desc: "Fraud prevention and dispute resolution",
+    count: 5,
+  },
+  {
+    icon: HelpCircle,
+    title: "General",
+    desc: "Platform rules and other topics",
+    count: 7,
+  },
 ];
 
 export default function HelpPage() {
@@ -22,7 +62,7 @@ export default function HelpPage() {
   const filteredFAQ = FAQ_DATA.filter(
     (faq) =>
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -52,7 +92,9 @@ export default function HelpPage() {
 
         {/* Categories */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl font-bold mb-8 text-center">Browse by Category</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">
+            Browse by Category
+          </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {HELP_CATEGORIES.map((cat) => (
               <motion.div
@@ -64,9 +106,15 @@ export default function HelpPage() {
                   <cat.icon className="w-5 h-5 text-[var(--color-bid-500)]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-sm mb-0.5 group-hover:text-[var(--color-bid-500)] transition-colors">{cat.title}</h3>
-                  <p className="text-xs text-[var(--color-muted-foreground)]">{cat.desc}</p>
-                  <p className="text-xs text-[var(--color-bid-500)] mt-1 font-medium">{cat.count} articles</p>
+                  <h3 className="font-bold text-sm mb-0.5 group-hover:text-[var(--color-bid-500)] transition-colors">
+                    {cat.title}
+                  </h3>
+                  <p className="text-xs text-[var(--color-muted-foreground)]">
+                    {cat.desc}
+                  </p>
+                  <p className="text-xs text-[var(--color-bid-500)] mt-1 font-medium">
+                    {cat.count} articles
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -75,7 +123,9 @@ export default function HelpPage() {
 
         {/* FAQ */}
         <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-          <h2 className="text-2xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-3">
             {filteredFAQ.map((faq, index) => (
               <div
@@ -83,10 +133,14 @@ export default function HelpPage() {
                 className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl overflow-hidden"
               >
                 <button
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  onClick={() =>
+                    setOpenIndex(openIndex === index ? null : index)
+                  }
                   className="w-full flex items-center justify-between p-5 text-left group"
                 >
-                  <span className="font-semibold text-sm pr-4">{faq.question}</span>
+                  <span className="font-semibold text-sm pr-4">
+                    {faq.question}
+                  </span>
                   <motion.div
                     animate={{ rotate: openIndex === index ? 180 : 0 }}
                     transition={{ duration: 0.2 }}

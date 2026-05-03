@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn, Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
@@ -9,20 +9,34 @@ import { MultiImageUpload } from "@/components/common/ImageUpload";
 import { CATEGORIES, CONDITIONS } from "@/config/constants";
 import { cn } from "@/lib/utils";
 
-const listingSchema = z.object({
-  title: z.string().min(5, "At least 5 characters"),
-  description: z.string().min(20, "At least 20 characters"),
-  category: z.string().min(1),
-  condition: z.string().min(1),
-  brand: z.string().optional(),
-  location: z.string().min(1, "Required"),
-  shippingCost: z.number().min(0),
-  startingPrice: z.number().min(100, "Min ৳100"),
-  bidIncrement: z.number().min(100, "Min ৳100"),
-  startTime: z.string().min(1, "Required"),
-  endTime: z.string().min(1, "Required"),
-  videoUrl: z.string().url().optional().or(z.literal("")),
-});
+const listingSchema = z
+  .object({
+    title: z.string().min(5, "At least 5 characters"),
+    description: z.string().min(20, "At least 20 characters"),
+    category: z.string().min(1, "Please select a category"),
+    condition: z.string().min(1, "Please select condition"),
+    brand: z.string().optional(),
+    location: z.string().min(1, "Location is required"),
+    shippingCost: z.number({ message: "Must be a number" }).min(0, "Min 0"),
+    startingPrice: z.number({ message: "Must be a number" }).min(100, "Min ৳100"),
+    bidIncrement: z.number({ message: "Must be a number" }).min(100, "Min ৳100"),
+    startTime: z.string().min(1, "Start time is required"),
+    endTime: z.string().min(1, "End time is required"),
+    videoUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      if (!data.startTime || !data.endTime) return true;
+      const start = new Date(data.startTime).getTime();
+      const end = new Date(data.endTime).getTime();
+      if (isNaN(start) || isNaN(end)) return true;
+      return end - start >= 3600000;
+    },
+    {
+      message: "Auction must run at least 1 hour",
+      path: ["endTime"],
+    },
+  );
 
 export type ListingFormData = z.infer<typeof listingSchema> & {
   photos: string[];
@@ -34,6 +48,43 @@ interface ListingFormProps {
   isLoading?: boolean;
   submitLabel?: string;
 }
+
+const Field = ({
+  name,
+  label,
+  type = "text",
+  placeholder,
+  required = false,
+  form,
+  children,
+}: {
+  name: Path<z.infer<typeof listingSchema>>;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  form: UseFormReturn<z.infer<typeof listingSchema>>;
+  children?: React.ReactNode;
+}) => (
+  <div className="space-y-1.5">
+    <label className="text-sm font-medium">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {children || (
+      <input
+        {...form.register(name, type === "number" ? { valueAsNumber: true } : {})}
+        type={type}
+        placeholder={placeholder}
+        className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-bid-500 focus:border-transparent transition-all"
+      />
+    )}
+    {form.formState.errors[name] && (
+      <p className="text-xs text-destructive">
+        {form.formState.errors[name]?.message as string}
+      </p>
+    )}
+  </div>
+);
 
 export function ListingForm({
   defaultValues,
@@ -63,44 +114,6 @@ export function ListingForm({
     await onSubmit({ ...data, photos });
   };
 
-  const Field = ({
-    name,
-    label,
-    type = "text",
-    placeholder,
-    required = false,
-    children,
-  }: {
-    name: keyof z.infer<typeof listingSchema>;
-    label: string;
-    type?: string;
-    placeholder?: string;
-    required?: boolean;
-    children?: React.ReactNode;
-  }) => (
-    <div className="space-y-1.5">
-      <label className="text-sm font-medium">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {children || (
-        <input
-          {...form.register(
-            name,
-            type === "number" ? { valueAsNumber: true } : {},
-          )}
-          type={type}
-          placeholder={placeholder}
-          className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-bid-500 focus:border-transparent transition-all"
-        />
-      )}
-      {form.formState.errors[name] && (
-        <p className="text-xs text-destructive">
-          {form.formState.errors[name]?.message as string}
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
       {/* Basic Info */}
@@ -114,6 +127,7 @@ export function ListingForm({
           label="Title"
           placeholder="What are you selling?"
           required
+          form={form}
         />
 
         <div className="space-y-1.5">
@@ -134,7 +148,7 @@ export function ListingForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field name="category" label="Category" required>
+          <Field name="category" label="Category" required form={form}>
             <select
               {...form.register("category")}
               className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-bid-500"
@@ -146,7 +160,7 @@ export function ListingForm({
               ))}
             </select>
           </Field>
-          <Field name="condition" label="Condition" required>
+          <Field name="condition" label="Condition" required form={form}>
             <select
               {...form.register("condition")}
               className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-bid-500"
@@ -161,12 +175,13 @@ export function ListingForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field name="brand" label="Brand" placeholder="Optional" />
+          <Field name="brand" label="Brand" placeholder="Optional" form={form} />
           <Field
             name="location"
             label="Location"
             placeholder="City / Area"
             required
+            form={form}
           />
         </div>
       </div>
@@ -192,6 +207,7 @@ export function ListingForm({
             type="number"
             placeholder="1000"
             required
+            form={form}
           />
           <Field
             name="bidIncrement"
@@ -199,6 +215,7 @@ export function ListingForm({
             type="number"
             placeholder="500"
             required
+            form={form}
           />
         </div>
         <Field
@@ -206,6 +223,7 @@ export function ListingForm({
           label="Shipping Cost (৳)"
           type="number"
           placeholder="0 = Free"
+          form={form}
         />
       </div>
 
@@ -220,12 +238,14 @@ export function ListingForm({
             label="Start Time"
             type="datetime-local"
             required
+            form={form}
           />
           <Field
             name="endTime"
             label="End Time"
             type="datetime-local"
             required
+            form={form}
           />
         </div>
       </div>
@@ -239,6 +259,7 @@ export function ListingForm({
           name="videoUrl"
           label="Video URL"
           placeholder="https://res.cloudinary.com/..."
+          form={form}
         />
       </div>
 

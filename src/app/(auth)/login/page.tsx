@@ -317,7 +317,7 @@ export default function LoginPage() {
                   )}
                 </button>
 
-                {/* Facebook button same থাকবে */}
+                {/* Facebook button is not working*/}
                 <div className="p-3 bg-[var(--color-muted)] rounded-full cursor-pointer hover:bg-[var(--color-accent)] transition-all">
                   <svg
                     viewBox="0 0 24 24"

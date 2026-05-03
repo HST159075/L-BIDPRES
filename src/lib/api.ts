@@ -70,9 +70,11 @@ api.interceptors.request.use(
 // ── Response interceptor ──────────────────────────────────────
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error: AxiosError<{ message: string }>) => {
-    const message = error.response?.data?.message || "Something went wrong";
+  (error: AxiosError<{ message: string; details?: unknown }>) => {
+    const data = error.response?.data;
+    const message = data?.message || "Something went wrong";
     const status = error.response?.status;
+    const details = data?.details;
 
     if (status === 401) {
       setAuthToken(null);
@@ -90,7 +92,7 @@ api.interceptors.response.use(
       toast.error("Server error. Please try again.");
     }
 
-    return Promise.reject({ message, status });
+    return Promise.reject({ message, status, details });
   },
 );
 

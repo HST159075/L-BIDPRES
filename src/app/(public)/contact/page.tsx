@@ -108,7 +108,7 @@ export default function ContactPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-sm font-medium">Email *</label>
+                    <label className="text-sm font-medium">Email</label>
                     <input
                       type="email"
                       value={form.email}
@@ -121,7 +121,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Subject *</label>
+                  <label className="text-sm font-medium">Subject </label>
                   <input
                     type="text"
                     value={form.subject}
@@ -133,7 +133,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium">Message *</label>
+                  <label className="text-sm font-medium">Message </label>
                   <textarea
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}

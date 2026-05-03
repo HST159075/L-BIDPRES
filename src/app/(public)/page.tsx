@@ -25,7 +25,6 @@ import { NewsletterSection } from "@/components/home/NewsletterSection";
 import { FAQSection } from "@/components/home/FAQSection";
 import { RecommendedAuctions } from "@/components/home/RecommendedAuctions";
 
-
 const STATS = [
   { key: "auctions", value: "2,400+", icon: TrendingUp },
   { key: "users", value: "18,000+", icon: Users },
@@ -40,8 +39,11 @@ export default async function HomePage() {
   return (
     <SmoothScroll>
       <div className="min-h-screen bg-[var(--color-background)]">
-        {/* ── Section 1: Hero ─────────────────────────────────────────── */}
-        <section className="relative flex items-center overflow-hidden pt-16" style={{ minHeight: "65vh", maxHeight: "70vh" }}>
+        {/*  Section 1: Hero */}
+        <section
+          className="relative flex items-center overflow-hidden pt-16"
+          style={{ minHeight: "65vh", maxHeight: "70vh" }}
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-bid-950)]/20 via-transparent to-transparent" />
           <div className="absolute top-20 right-0 w-[600px] h-[600px] bg-[var(--color-bid-500)]/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -118,10 +120,10 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── Section 2: Categories ────────────────────────────────── */}
+        {/* ── Section 2: Categories */}
         <CategoriesSection />
 
-        {/* ── Section 3: Featured Auctions ───────────────────────── */}
+        {/*  Section 3: Featured Auctions  */}
         <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <ScrollReveal>
             <div className="flex items-end justify-between mb-10">
@@ -163,14 +165,13 @@ export default async function HomePage() {
           </Suspense>
         </section>
 
-        {/* ── Section 4: Recommended for You (AI) ────────────────── */}
+        {/* Section 4: Recommended for You (AI) */}
         <RecommendedAuctions />
 
-
-        {/* ── Section 4: Statistics Counter ──────────────────────── */}
+        {/*  Section 4: Statistics Counter  */}
         <StatsSection />
 
-        {/* ── Section 5: How it works ────────────────────────────── */}
+        {/*  Section 5: How it works  */}
         <section className="py-24 bg-[var(--color-muted)]/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ScrollReveal className="text-center mb-16">
@@ -213,25 +214,13 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── Section 6: Why Choose Us ───────────────────────────── */}
         <WhyChooseUsSection />
-
-        {/* ── Section 7: Trust & Security ────────────────────────── */}
         <TrustSection />
-
-        {/* ── Section 8: Testimonials ────────────────────────────── */}
         <TestimonialsSection />
-
-        {/* ── Section 9: Blog Preview ────────────────────────────── */}
         <BlogPreviewSection />
-
-        {/* ── Section 10: FAQ ────────────────────────────────────── */}
         <FAQSection />
-
-        {/* ── Section 11: Newsletter ─────────────────────────────── */}
         <NewsletterSection />
 
-        {/* ── Section 12: CTA ────────────────────────────────────── */}
         <section className="py-24 px-4">
           <ScrollReveal>
             <div className="max-w-3xl mx-auto text-center space-y-6 bg-gradient-to-br from-[var(--color-bid-500)]/10 to-transparent border border-[var(--color-bid-500)]/20 rounded-3xl p-12">
@@ -239,8 +228,8 @@ export default async function HomePage() {
                 Ready to start bidding?
               </h2>
               <p className="text-[var(--color-muted-foreground)]">
-                Join thousands of buyers and sellers on Bangladesh&apos;s premier
-                auction platform.
+                Join thousands of buyers and sellers on Bangladesh&apos;s
+                premier auction platform.
               </p>
               <Link
                 href={ROUTES.register}
