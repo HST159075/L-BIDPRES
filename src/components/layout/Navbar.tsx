@@ -49,7 +49,15 @@ export function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await authService.logout().catch(() => {});
+      const { authClient } = await import("@/lib/auth-client");
+      await authClient.signOut();
+      
+      // Manual cleanup for extra safety
+      const Cookies = (await import("js-cookie")).default;
+      Cookies.remove("bidpress.session_token", { path: '/' });
+      Cookies.remove("__Secure-bidpress.session_token", { path: '/' });
+      Cookies.remove("user-role", { path: '/' });
+      
       setAuthToken(null);
       logout();
       window.location.href = ROUTES.login;
