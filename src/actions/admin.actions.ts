@@ -3,14 +3,14 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+const API = process.env.NEXT_PUBLIC_API_URL || "https://s-bidpres.onrender.com/api/v1";
 
 async function adminFetch(path: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
   const sessionToken =
-    cookieStore.get("session")?.value ||
-    cookieStore.get("better-auth.session_token")?.value ||
-    cookieStore.get("__Secure-better-auth.session_token")?.value;
+    cookieStore.get("bidpress.session_token")?.value ||
+    cookieStore.get("__Secure-bidpress.session_token")?.value ||
+    cookieStore.get("session")?.value;
 
   const res = await fetch(`${API}${path}`, {
     ...options,
