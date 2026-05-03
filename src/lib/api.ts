@@ -80,12 +80,8 @@ api.interceptors.response.use(
 
     if (status === 401) {
       setAuthToken(null);
-      if (
-        typeof window !== "undefined" &&
-        !window.location.pathname.includes("/login")
-      ) {
-        window.location.href = "/login";
-      }
+      // Removed automatic redirect to prevent loops. 
+      // Middleware will handle redirects for protected routes.
     } else if (status === 403) {
       toast.error("Access denied");
     } else if (status === 429) {
